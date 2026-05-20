@@ -2,8 +2,9 @@
 
 | Task | Why It Matters | Status |
 |---|---|---|
-| Copy Docs Batch 2 files into repo root after review. | Adds Steps 7–12 docs and templates. | Pending |
-| Confirm `.gitignore` protects `local-only/` and private files. | Prevents private POC content from being committed. | Pending |
+| Copy Docs Batch 2 files into repo root after review. | Adds Steps 7–12 docs and templates. | Complete |
+| Initialize Git/repo and connect remote. | Needed for tracked-file checks, rollback safety, and future Codex diff review. | Complete |
+| Confirm `.gitignore` protects `local-only/` and private files. | Prevents private POC content from being committed. | Complete |
 | Before adding private card content, create local-only private deck file outside git tracking. | Keeps POC content local-only. | Future |
 | Create Supabase project during implementation setup. | Required for auth/database/RLS/realtime. | Future |
 | Configure Magic Link / OTP auth and redirect URLs. | Required for auth and invite return routing. | Future |
