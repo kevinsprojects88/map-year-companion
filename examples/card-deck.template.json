@@ -1,0 +1,18 @@
+{
+  "deckName": "Placeholder Community Year Deck",
+  "version": 1,
+  "cards": [
+    {
+      "cardKey": "spring_01",
+      "season": "spring",
+      "weekNumber": 1,
+      "promptText": "Placeholder prompt text. Replace with user-provided private content before play."
+    },
+    {
+      "cardKey": "spring_02",
+      "season": "spring",
+      "weekNumber": 2,
+      "promptText": "Placeholder prompt text. Replace with user-provided private content before play."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+:root {
+  --background: var(--paper-50);
+  --foreground: var(--charcoal-900);
+  --card: #fffdf7;
+  --card-foreground: var(--charcoal-900);
+  --popover: #fffdf7;
+  --popover-foreground: var(--charcoal-900);
+  --primary: var(--moss-700);
+  --primary-foreground: #fbf8ef;
+  --secondary: var(--paper-200);
+  --secondary-foreground: var(--charcoal-900);
+  --muted: #f5efe1;
+  --muted-foreground: var(--slate-700);
+  --accent: var(--ochre-300);
+  --accent-foreground: var(--charcoal-900);
+  --destructive: var(--rust-500);
+  --border: #cfc4aa;
+  --input: #cfc4aa;
+  --ring: var(--moss-600);
+  --radius: 0.5rem;
+}
