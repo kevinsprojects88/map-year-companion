@@ -5,9 +5,17 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+
+const placeholderOptions = [
+  { label: "Quiet placeholder", value: "quiet" },
+  { label: "Draft placeholder", value: "draft" },
+  { label: "Disabled placeholder", value: "disabled", disabled: true },
+  { label: "Official placeholder", value: "official" }
+];
 
 export default function Home() {
   return (
@@ -15,115 +23,113 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1D placeholder design-system demo
+            Phase 1E placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-3xl text-4xl font-semibold sm:text-5xl">
-              Input and Textarea Primitives
+              Select, Checkbox, and Toggle Primitives
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks reusable form-field treatments.
-              It is not a real product screen, route, form, auth flow, map
-              tool, chat, poll, or game setup experience.
+              This temporary page only checks reusable control treatments. It
+              is not a real product screen, route, form, auth flow, map tool,
+              chat, poll, or game setup experience.
             </p>
           </div>
         </section>
 
-        <Card aria-labelledby="input-states" variant="raised">
+        <Card aria-labelledby="select-states" variant="raised">
           <CardHeader>
-            <CardTitle id="input-states">Input States</CardTitle>
+            <CardTitle id="select-states">Select States</CardTitle>
             <CardDescription>
-              Labels, helper text, validation copy, draft borders, settled
-              read-only styling, and disabled affordances stay visible without
-              relying on color alone.
+              Native select controls keep labels, helper text, validation copy,
+              disabled options, draft borders, and settled read-only styling
+              visible without relying on color alone.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup className="grid gap-5 md:grid-cols-2">
               <Field
-                description="Plain helper copy explains what this placeholder field expects."
-                id="input-default"
-                label="Placeholder title"
+                description="Plain helper copy explains what this placeholder selector expects."
+                id="select-default"
+                label="Placeholder selector"
                 required
               >
                 {(field) => (
-                  <Input
+                  <Select
                     {...field}
-                    placeholder="Add a short placeholder title"
+                    defaultValue=""
+                    options={placeholderOptions}
+                    placeholder="Choose a placeholder option"
                   />
                 )}
               </Field>
 
               <Field
-                error="Use a specific placeholder title before this sample could continue."
-                id="input-error"
-                label="Short title"
+                error="Choose a specific placeholder option before this sample could continue."
+                id="select-error"
+                label="Validation selector"
                 required
                 variant="error"
               >
                 {(field) => (
-                  <Input {...field} defaultValue="A" placeholder="Short title" />
-                )}
-              </Field>
-
-              <Field
-                id="input-success"
-                label="Reference code"
-                message="The placeholder code is readable and ready to compare."
-                variant="success"
-              >
-                {(field) => (
-                  <Input
+                  <Select
                     {...field}
-                    defaultValue="PLACEHOLDER-014"
-                    placeholder="PLACEHOLDER-000"
+                    defaultValue=""
+                    options={placeholderOptions}
+                    placeholder="Choose one"
                   />
                 )}
               </Field>
 
               <Field
-                description="Draft fields keep a provisional label and broken border treatment."
-                id="input-draft"
-                label="Draft marker"
-                message="This value is still provisional."
+                id="select-success"
+                label="Verified selector"
+                message="The selected placeholder is ready to compare."
+                variant="success"
+              >
+                {(field) => (
+                  <Select {...field} defaultValue="quiet" options={placeholderOptions} />
+                )}
+              </Field>
+
+              <Field
+                description="Draft selectors keep a provisional label and broken border treatment."
+                id="select-draft"
+                label="Draft selector"
+                message="This selection is still provisional."
                 statusLabel="Draft"
                 variant="draft"
               >
                 {(field) => (
-                  <Input
-                    {...field}
-                    defaultValue="Uncommitted placeholder"
-                    placeholder="Draft marker"
-                  />
+                  <Select {...field} defaultValue="draft" options={placeholderOptions} />
                 )}
               </Field>
 
               <Field
-                id="input-official"
-                label="Official archive label"
-                message="Read-only fields should feel settled, not editable."
+                id="select-official"
+                label="Official selector"
+                message="Read-only select styling should feel settled, not active."
                 readOnly
                 variant="official"
               >
                 {(field) => (
-                  <Input
-                    {...field}
-                    defaultValue="Committed placeholder record"
-                  />
+                  <Select {...field} defaultValue="official" options={placeholderOptions} />
                 )}
               </Field>
 
               <Field
                 description="Disabled examples look unavailable and are not focusable."
                 disabled
-                id="input-disabled"
-                label="Unavailable placeholder"
+                id="select-disabled"
+                label="Unavailable selector"
                 statusLabel="Disabled"
               >
                 {(field) => (
-                  <Input
+                  <Select
                     {...field}
-                    placeholder="This placeholder is disabled"
+                    defaultValue=""
+                    options={placeholderOptions}
+                    placeholder="Unavailable placeholder"
                   />
                 )}
               </Field>
@@ -131,99 +137,106 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card aria-labelledby="textarea-states" variant="raised">
+        <Card aria-labelledby="checkbox-states" variant="raised">
           <CardHeader>
-            <CardTitle id="textarea-states">Textarea States</CardTitle>
+            <CardTitle id="checkbox-states">Checkbox States</CardTitle>
             <CardDescription>
-              Multi-line controls use the same state language, with lightweight
-              chat and prompt treatments for later composition work.
+              Checkbox controls use native input semantics, visible focus, and
+              a drawn check mark so checked state is not conveyed by color
+              alone.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FieldGroup className="grid gap-5 lg:grid-cols-2">
+            <FieldGroup className="grid gap-5 md:grid-cols-2">
               <Field
-                description="Default textarea styling is quiet and suited to longer placeholder notes."
-                id="textarea-default"
-                label="Community note placeholder"
+                description="The field helper can connect supporting text to a checkbox control."
+                id="checkbox-field-default"
+                label="Field-wrapped checkbox"
               >
                 {(field) => (
-                  <Textarea
+                  <Checkbox
                     {...field}
-                    placeholder="Write a short placeholder note."
+                    label="Checked placeholder"
+                    description="This is a placeholder checkbox label, not a real checklist item."
                   />
                 )}
               </Field>
 
               <Field
-                id="textarea-error"
-                label="Validation note"
-                error="Add enough placeholder context for another reader to understand it."
-                required
+                id="checkbox-field-error"
+                label="Validation checkbox"
+                error="Confirm the placeholder condition before this sample could continue."
                 variant="error"
               >
                 {(field) => (
-                  <Textarea
+                  <Checkbox
                     {...field}
-                    defaultValue="Too brief."
-                    placeholder="Add placeholder context."
+                    label="Missing placeholder confirmation"
+                    description="The error text is announced through the field helper."
                   />
                 )}
               </Field>
 
               <Field
-                id="textarea-draft"
-                label="Draft turn note"
-                message="This text is saved as a draft example, not official history."
+                id="checkbox-field-success"
+                label="Verified checkbox"
+                message="This placeholder condition has been checked."
+                variant="success"
+              >
+                {(field) => (
+                  <Checkbox
+                    {...field}
+                    defaultChecked
+                    label="Checked and verified"
+                    description="The check mark and label both indicate state."
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="checkbox-field-draft"
+                label="Draft checkbox"
+                message="This checked value remains provisional."
                 variant="draft"
               >
                 {(field) => (
-                  <Textarea
+                  <Checkbox
                     {...field}
-                    defaultValue="A provisional placeholder note waits for review."
-                    placeholder="Draft placeholder text"
+                    defaultChecked
+                    label="Draft placeholder"
+                    description="Dashed styling marks this sample as provisional."
                   />
                 )}
               </Field>
 
               <Field
-                id="textarea-official"
-                label="Official ledger excerpt"
-                message="Committed examples are calm and read-only."
-                readOnly
+                id="checkbox-field-official"
+                label="Official checkbox"
+                message="This checked state is presented as settled placeholder copy."
                 variant="official"
               >
                 {(field) => (
-                  <Textarea
+                  <Checkbox
                     {...field}
-                    defaultValue="Committed placeholder summary for the archive demo."
+                    defaultChecked
+                    label="Official placeholder"
+                    description="The control remains a primitive sample only."
                   />
                 )}
               </Field>
 
               <Field
-                description="Chat styling remains conversational, but this is only a primitive sample."
-                id="textarea-chat"
-                label="Chat composer placeholder"
+                description="Disabled examples are visibly unavailable and removed from normal interaction."
+                disabled
+                id="checkbox-field-disabled"
+                label="Disabled checkbox"
               >
                 {(field) => (
-                  <Textarea
+                  <Checkbox
                     {...field}
-                    placeholder="Add a placeholder chat note."
-                    variant="chat"
-                  />
-                )}
-              </Field>
-
-              <Field
-                description="Prompt styling is generic placeholder treatment only; no official card text is included."
-                id="textarea-card-prompt"
-                label="Prompt placeholder"
-              >
-                {(field) => (
-                  <Textarea
-                    {...field}
-                    placeholder="Describe a generic placeholder prompt."
-                    variant="cardPrompt"
+                    defaultChecked
+                    label="Unavailable placeholder"
+                    description="This disabled checked state is only a control sample."
                   />
                 )}
               </Field>
@@ -231,38 +244,104 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card aria-labelledby="field-helper" variant="draft">
+        <Card aria-labelledby="switch-states" variant="raised">
           <CardHeader>
-            <CardTitle id="field-helper">Field Helper Behavior</CardTitle>
+            <CardTitle id="switch-states">Switch States</CardTitle>
             <CardDescription>
-              The Field helper can generate IDs, connect helper and error text,
-              mark required controls, and pass disabled or read-only state to
-              the primitive it wraps.
+              Switch controls are checkbox inputs with switch semantics, visible
+              On/Off text, and knob movement so state is clear beyond color.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FieldGroup className="grid gap-5 lg:grid-cols-2">
+            <FieldGroup className="grid gap-5 md:grid-cols-2">
               <Field
-                description="The required marker is visible, while the input also receives native required state."
-                id="field-required"
-                label="Required placeholder"
-                required
+                description="Use switches for later settings-style booleans, not irreversible actions."
+                id="switch-field-default"
+                label="Default switch"
               >
                 {(field) => (
-                  <Input {...field} placeholder="Required placeholder" />
+                  <Switch
+                    {...field}
+                    label="Off placeholder"
+                    description="The native input remains keyboard reachable."
+                  />
                 )}
               </Field>
 
               <Field
-                description="Read-only copy and styling make this sample inspectable without implying edit access."
-                id="field-readonly"
-                label="Read-only placeholder"
-                readOnly
+                description="Checked switches show both moved position and visible On text."
+                id="switch-field-on"
+                label="Checked switch"
               >
                 {(field) => (
-                  <Textarea
+                  <Switch
                     {...field}
-                    defaultValue="This placeholder value can be read but not edited."
+                    defaultChecked
+                    label="On placeholder"
+                    description="This does not change any real application setting."
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="switch-field-success"
+                label="Verified switch"
+                message="This placeholder switch is enabled for the sample."
+                variant="success"
+              >
+                {(field) => (
+                  <Switch
+                    {...field}
+                    defaultChecked
+                    label="Verified placeholder"
+                    description="Success styling stays paired with explicit text."
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="switch-field-draft"
+                label="Draft switch"
+                message="This placeholder setting is still provisional."
+                variant="draft"
+              >
+                {(field) => (
+                  <Switch
+                    {...field}
+                    label="Draft placeholder"
+                    description="Dashed styling keeps the state provisional."
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="switch-field-official"
+                label="Official switch"
+                message="This placeholder setting is presented as settled."
+                variant="official"
+              >
+                {(field) => (
+                  <Switch
+                    {...field}
+                    defaultChecked
+                    label="Official placeholder"
+                    description="This is still only a design-system primitive."
+                  />
+                )}
+              </Field>
+
+              <Field
+                description="Disabled switches keep their state visible without allowing interaction."
+                disabled
+                id="switch-field-disabled"
+                label="Disabled switch"
+              >
+                {(field) => (
+                  <Switch
+                    {...field}
+                    defaultChecked
+                    label="Unavailable placeholder"
+                    description="Disabled controls are muted and non-interactive."
                   />
                 )}
               </Field>
