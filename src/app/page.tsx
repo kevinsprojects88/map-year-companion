@@ -1,59 +1,13 @@
-import { AutosaveStatus } from "@/components/feedback/autosave-status";
-import { EmptyState } from "@/components/feedback/empty-state";
-import { ErrorState } from "@/components/feedback/error-state";
-import { LoadingSkeleton } from "@/components/feedback/loading-skeleton";
-import { PermissionAlert } from "@/components/feedback/permission-alert";
-import { ValidationAlert } from "@/components/feedback/validation-alert";
-import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/button";
-
-const buttonVariants: Array<{
-  variant: ButtonVariant;
-  label: string;
-  note: string;
-}> = [
-  {
-    variant: "primary",
-    label: "Primary action",
-    note: "Main next step"
-  },
-  {
-    variant: "secondary",
-    label: "Secondary action",
-    note: "Supporting action"
-  },
-  {
-    variant: "ghost",
-    label: "Quiet action",
-    note: "Low emphasis"
-  },
-  {
-    variant: "destructive",
-    label: "Destructive action",
-    note: "Permanent change"
-  },
-  {
-    variant: "process",
-    label: "Process action",
-    note: "Governance/admin"
-  },
-  {
-    variant: "draft",
-    label: "Save draft",
-    note: "Provisional"
-  },
-  {
-    variant: "official",
-    label: "Commit official",
-    note: "Settled record"
-  }
-];
-
-const buttonSizes: Array<{ size: ButtonSize; label: string }> = [
-  { size: "sm", label: "Small" },
-  { size: "default", label: "Default" },
-  { size: "lg", label: "Large" },
-  { size: "icon", label: "+" }
-];
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Field, FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Home() {
   return (
@@ -61,214 +15,265 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1C placeholder design-system demo
+            Phase 1D placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-3xl text-4xl font-semibold sm:text-5xl">
-              Button Variants and Feedback Primitives
+              Input and Textarea Primitives
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks reusable component treatments.
-              Product screens, routes, data, auth, chat, map tools, and game
-              flows remain deferred.
+              This temporary page only checks reusable form-field treatments.
+              It is not a real product screen, route, form, auth flow, map
+              tool, chat, poll, or game setup experience.
             </p>
           </div>
         </section>
 
-        <section aria-labelledby="button-variants" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 id="button-variants" className="text-2xl font-semibold">
-              Button Variants
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Actions should not all look primary. Draft, official, process,
-              and destructive work use distinct field-journal state treatments.
-            </p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {buttonVariants.map((sample) => (
-              <div
-                key={sample.variant}
-                className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-paper-sm"
+        <Card aria-labelledby="input-states" variant="raised">
+          <CardHeader>
+            <CardTitle id="input-states">Input States</CardTitle>
+            <CardDescription>
+              Labels, helper text, validation copy, draft borders, settled
+              read-only styling, and disabled affordances stay visible without
+              relying on color alone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup className="grid gap-5 md:grid-cols-2">
+              <Field
+                description="Plain helper copy explains what this placeholder field expects."
+                id="input-default"
+                label="Placeholder title"
+                required
               >
-                <Button variant={sample.variant}>{sample.label}</Button>
-                <p className="font-mono text-xs font-semibold uppercase text-muted-foreground">
-                  {sample.note}
-                </p>
-              </div>
-            ))}
-            <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-paper-sm">
-              <Button disabled variant="secondary">
-                Disabled action
-              </Button>
-              <p className="font-mono text-xs font-semibold uppercase text-muted-foreground">
-                Disabled state
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-paper-sm">
-              <Button loading loadingText="Saving" variant="draft">
-                Save draft
-              </Button>
-              <p className="font-mono text-xs font-semibold uppercase text-muted-foreground">
-                Loading state
-              </p>
-            </div>
-          </div>
-        </section>
+                {(field) => (
+                  <Input
+                    {...field}
+                    placeholder="Add a short placeholder title"
+                  />
+                )}
+              </Field>
 
-        <section aria-labelledby="button-sizes" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 id="button-sizes" className="text-2xl font-semibold">
-              Button Sizes
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Sizes keep comfortable tap targets and support icon-only controls
-              with a readable accessible label.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {buttonSizes.map((sample) => (
-              <Button
-                key={sample.size}
-                aria-label={
-                  sample.size === "icon" ? "Add placeholder item" : undefined
-                }
-                size={sample.size}
-                variant={sample.size === "icon" ? "secondary" : "primary"}
+              <Field
+                error="Use a specific placeholder title before this sample could continue."
+                id="input-error"
+                label="Short title"
+                required
+                variant="error"
               >
-                {sample.label}
-              </Button>
-            ))}
-          </div>
-        </section>
+                {(field) => (
+                  <Input {...field} defaultValue="A" placeholder="Short title" />
+                )}
+              </Field>
 
-        <section aria-labelledby="empty-states" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 id="empty-states" className="text-2xl font-semibold">
-              Empty States
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Empty copy explains what is missing, why it matters, and what can
-              happen next.
-            </p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <EmptyState
-              title="No official history yet."
-              description="History begins when the first placeholder turn is committed."
-              action={<Button variant="secondary">Review placeholder draft</Button>}
-              variant="actionable"
-            />
-            <EmptyState
-              title="Archived examples are quiet here."
-              description="This placeholder area stays read-only until a preserved record exists."
-              variant="archived"
-            />
-          </div>
-        </section>
+              <Field
+                id="input-success"
+                label="Reference code"
+                message="The placeholder code is readable and ready to compare."
+                variant="success"
+              >
+                {(field) => (
+                  <Input
+                    {...field}
+                    defaultValue="PLACEHOLDER-014"
+                    placeholder="PLACEHOLDER-000"
+                  />
+                )}
+              </Field>
 
-        <section aria-labelledby="error-states" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 id="error-states" className="text-2xl font-semibold">
-              Error States
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Errors stay plain, recovery-oriented, and free of raw system
-              details by default.
-            </p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <ErrorState
-              title="Draft could not be loaded."
-              description="The saved placeholder draft is unavailable right now. Try again before changing the record."
-              recoveryAction={<Button variant="secondary">Try again</Button>}
-              variant="network"
-            />
-            <ErrorState
-              title="Validation needs attention."
-              description="A few placeholder fields need review before this example could continue."
-              recoveryAction={<Button variant="process">Open review list</Button>}
-              variant="validation"
-            />
-          </div>
-        </section>
+              <Field
+                description="Draft fields keep a provisional label and broken border treatment."
+                id="input-draft"
+                label="Draft marker"
+                message="This value is still provisional."
+                statusLabel="Draft"
+                variant="draft"
+              >
+                {(field) => (
+                  <Input
+                    {...field}
+                    defaultValue="Uncommitted placeholder"
+                    placeholder="Draft marker"
+                  />
+                )}
+              </Field>
 
-        <section aria-labelledby="loading-states" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 id="loading-states" className="text-2xl font-semibold">
-              Loading Skeletons
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Skeletons cover card, row, and panel shapes with restrained
-              movement and readable status text for assistive technology.
-            </p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            <LoadingSkeleton variant="card" />
-            <LoadingSkeleton variant="row" />
-            <LoadingSkeleton variant="panel" />
-          </div>
-        </section>
+              <Field
+                id="input-official"
+                label="Official archive label"
+                message="Read-only fields should feel settled, not editable."
+                readOnly
+                variant="official"
+              >
+                {(field) => (
+                  <Input
+                    {...field}
+                    defaultValue="Committed placeholder record"
+                  />
+                )}
+              </Field>
 
-        <section
-          aria-labelledby="permission-validation"
-          className="flex flex-col gap-4"
-        >
-          <div className="flex flex-col gap-2">
-            <h2 id="permission-validation" className="text-2xl font-semibold">
-              Permission and Validation
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Boundary messages explain what is unavailable without making the
-              interface feel broken.
-            </p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <PermissionAlert
-              title="Only the active placeholder player can commit this turn."
-              description="You can still discuss, inspect the draft, and review the shared state."
-              allowedActions={[
-                "Read the saved draft.",
-                "Add placeholder discussion.",
-                "Review validation notes."
-              ]}
-              disabledReason="Commit is disabled because this placeholder viewer is not the active player."
-              roleContext="Viewer"
-              turnContext="Waiting"
-            />
-            <ValidationAlert
-              title="Placeholder setup needs review."
-              messages={[
-                "Add a short title before continuing.",
-                "Choose at least one placeholder participant.",
-                "Confirm that no official content is included."
-              ]}
-              variant="warning"
-            />
-          </div>
-        </section>
+              <Field
+                description="Disabled examples look unavailable and are not focusable."
+                disabled
+                id="input-disabled"
+                label="Unavailable placeholder"
+                statusLabel="Disabled"
+              >
+                {(field) => (
+                  <Input
+                    {...field}
+                    placeholder="This placeholder is disabled"
+                  />
+                )}
+              </Field>
+            </FieldGroup>
+          </CardContent>
+        </Card>
 
-        <section aria-labelledby="autosave" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h2 id="autosave" className="text-2xl font-semibold">
-              Autosave Status
-            </h2>
-            <p className="max-w-2xl leading-7 text-muted-foreground">
-              Autosave feedback uses readable text first, with color and motion
-              as supporting cues only.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <AutosaveStatus state="idle" />
-            <AutosaveStatus state="saving" />
-            <AutosaveStatus state="saved" timestamp="Saved 2 min ago" />
-            <AutosaveStatus state="error" />
-          </div>
-        </section>
+        <Card aria-labelledby="textarea-states" variant="raised">
+          <CardHeader>
+            <CardTitle id="textarea-states">Textarea States</CardTitle>
+            <CardDescription>
+              Multi-line controls use the same state language, with lightweight
+              chat and prompt treatments for later composition work.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup className="grid gap-5 lg:grid-cols-2">
+              <Field
+                description="Default textarea styling is quiet and suited to longer placeholder notes."
+                id="textarea-default"
+                label="Community note placeholder"
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    placeholder="Write a short placeholder note."
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="textarea-error"
+                label="Validation note"
+                error="Add enough placeholder context for another reader to understand it."
+                required
+                variant="error"
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    defaultValue="Too brief."
+                    placeholder="Add placeholder context."
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="textarea-draft"
+                label="Draft turn note"
+                message="This text is saved as a draft example, not official history."
+                variant="draft"
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    defaultValue="A provisional placeholder note waits for review."
+                    placeholder="Draft placeholder text"
+                  />
+                )}
+              </Field>
+
+              <Field
+                id="textarea-official"
+                label="Official ledger excerpt"
+                message="Committed examples are calm and read-only."
+                readOnly
+                variant="official"
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    defaultValue="Committed placeholder summary for the archive demo."
+                  />
+                )}
+              </Field>
+
+              <Field
+                description="Chat styling remains conversational, but this is only a primitive sample."
+                id="textarea-chat"
+                label="Chat composer placeholder"
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    placeholder="Add a placeholder chat note."
+                    variant="chat"
+                  />
+                )}
+              </Field>
+
+              <Field
+                description="Prompt styling is generic placeholder treatment only; no official card text is included."
+                id="textarea-card-prompt"
+                label="Prompt placeholder"
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    placeholder="Describe a generic placeholder prompt."
+                    variant="cardPrompt"
+                  />
+                )}
+              </Field>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+
+        <Card aria-labelledby="field-helper" variant="draft">
+          <CardHeader>
+            <CardTitle id="field-helper">Field Helper Behavior</CardTitle>
+            <CardDescription>
+              The Field helper can generate IDs, connect helper and error text,
+              mark required controls, and pass disabled or read-only state to
+              the primitive it wraps.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup className="grid gap-5 lg:grid-cols-2">
+              <Field
+                description="The required marker is visible, while the input also receives native required state."
+                id="field-required"
+                label="Required placeholder"
+                required
+              >
+                {(field) => (
+                  <Input {...field} placeholder="Required placeholder" />
+                )}
+              </Field>
+
+              <Field
+                description="Read-only copy and styling make this sample inspectable without implying edit access."
+                id="field-readonly"
+                label="Read-only placeholder"
+                readOnly
+              >
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    defaultValue="This placeholder value can be read but not edited."
+                  />
+                )}
+              </Field>
+            </FieldGroup>
+          </CardContent>
+        </Card>
 
         <section className="rounded-lg border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
-          Placeholder content only. No official or proprietary game content is
-          included.
+          Placeholder content only. No official or proprietary game content,
+          private proof-of-concept data, secrets, auth wiring, Supabase schema,
+          chat, polls, map editing, or game creation features are included.
         </section>
       </div>
     </main>
