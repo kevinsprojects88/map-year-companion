@@ -46,6 +46,14 @@ Semantic examples:
 
 Components should use semantic tokens. Raw tokens belong in theme definitions.
 
+### Phase 1A Token Convention
+
+- `src/styles/tokens.css` is the source of truth for raw palette values and semantic design tokens.
+- `src/styles/theme.css` maps semantic tokens into shadcn-compatible variables.
+- `src/app/globals.css` exposes theme values to Tailwind v4 and applies global base styling.
+- Components should prefer semantic tokens over raw palette values.
+- Raw palette values belong in token and theme definitions, not scattered across component files.
+
 ## Component Library
 
 Use `shadcn/ui` as the base and theme it heavily toward Weathered Field Journal.
