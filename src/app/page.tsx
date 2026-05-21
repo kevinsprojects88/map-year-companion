@@ -1,165 +1,189 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { SegmentedControl } from "@/components/ui/segmented-control";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
+import { DashboardSection } from "@/components/dashboard/dashboard-section";
+import { GameCard } from "@/components/dashboard/game-card";
+import { SetupChecklistCard } from "@/components/lobby/setup-checklist-card";
+import { EmptyState } from "@/components/feedback/empty-state";
+import type { GameCardViewModel } from "@/types/game";
+import type { SetupChecklistItem } from "@/types/setup";
 
-const methodOptions = [
-  { label: "Guided", value: "guided" },
-  { label: "Manual", value: "manual" },
-  { label: "Import", value: "import", badge: "JSON" },
-  { label: "Unavailable", value: "unavailable", disabled: true }
+const gameCards: GameCardViewModel[] = [
+  {
+    activePlayerLabel: "Active player: Rowan",
+    indicators: {
+      hasDraft: true,
+      hasActiveStoryPoll: true
+    },
+    lastUpdatedLabel: "Updated 18 minutes ago",
+    name: "North Ridge Field Notes",
+    playerCountLabel: "4 players",
+    primaryActionLabel: "Resume Turn",
+    status: "yourTurn",
+    turnLabel: "Week 3, Turn 2"
+  },
+  {
+    activePlayerLabel: "Active player: Mira",
+    indicators: {
+      hasDraft: true
+    },
+    lastUpdatedLabel: "Updated this morning",
+    name: "Harbor Map Study",
+    playerCountLabel: "5 players",
+    primaryActionLabel: "Open Game",
+    status: "active",
+    turnLabel: "Week 5, Turn 1"
+  },
+  {
+    activePlayerLabel: "Waiting for a final player confirmation",
+    lastUpdatedLabel: "Updated yesterday",
+    name: "Riverbend Setup",
+    playerCountLabel: "3 players",
+    primaryActionLabel: "Review Setup",
+    status: "waitingToStart",
+    turnLabel: "Lobby checklist"
+  },
+  {
+    activePlayerLabel: "Process vote needs review",
+    indicators: {
+      hasProcessVote: true,
+      needsAttention: true
+    },
+    lastUpdatedLabel: "Updated 2 hours ago",
+    name: "Low Meadow Notebook",
+    playerCountLabel: "4 players",
+    primaryActionLabel: "Review Vote",
+    status: "needsAttention",
+    turnLabel: "Week 7, Turn 3"
+  },
+  {
+    activePlayerLabel: "Completed world",
+    lastUpdatedLabel: "Completed last week",
+    name: "Old Mill Archive",
+    playerCountLabel: "4 players",
+    primaryActionLabel: "Read Archive",
+    status: "completed",
+    turnLabel: "Final archive"
+  },
+  {
+    activePlayerLabel: "Read-only record",
+    lastUpdatedLabel: "Archived 3 months ago",
+    name: "Cedar Hollow Record",
+    playerCountLabel: "2 players",
+    primaryActionLabel: "Open Record",
+    status: "archived",
+    turnLabel: "Settled archive"
+  }
 ];
 
-const densityOptions = [
-  { label: "Compact", value: "compact" },
-  { label: "Balanced", value: "balanced" },
-  { label: "Disabled", value: "disabled", disabled: true }
+const setupItems: SetupChecklistItem[] = [
+  {
+    actionLabel: "Review",
+    description:
+      "The name, short description, and shared intent are ready for the group.",
+    requirement: "required",
+    status: "complete",
+    title: "Game Information",
+    validationMessages: ["Required fields are filled in."]
+  },
+  {
+    actionLabel: "Invite",
+    description:
+      "A private invite link can be shared once the player list is ready.",
+    requirement: "required",
+    status: "incomplete",
+    title: "Invite Players",
+    validationMessages: ["At least one invited player is still pending."]
+  },
+  {
+    actionLabel: "Adjust",
+    description:
+      "The order is saved, but the group can still revise it before starting.",
+    requirement: "required",
+    status: "warning",
+    title: "Turn Order",
+    validationMessages: [
+      "One player appears twice in the placeholder order.",
+      "Confirm the first active player before starting."
+    ]
+  },
+  {
+    actionLabel: "Resolve",
+    description:
+      "The placeholder deck import has structural issues that block start.",
+    requirement: "required",
+    status: "blocked",
+    title: "Deck Setup",
+    validationMessages: [
+      "The placeholder JSON shape is incomplete.",
+      "No official or proprietary content is included in this demo."
+    ]
+  },
+  {
+    actionLabel: "Add Note",
+    description:
+      "Optional table notes can be recorded for later reference by the group.",
+    requirement: "optional",
+    status: "optional",
+    title: "Community Notes",
+    validationMessages: ["This can remain blank for now."]
+  }
 ];
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background px-6 py-10 text-foreground sm:px-10 lg:py-14">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1F placeholder design-system demo
+            Phase 1G placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
-            <h1 className="max-w-3xl text-4xl font-semibold sm:text-5xl">
-              Tabs and Segmented Control Primitives
+            <h1 className="max-w-4xl text-4xl font-semibold sm:text-5xl">
+              GameCard and SetupChecklistCard Primitives
             </h1>
-            <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks reusable panel-switching and
-              choice-control treatments. It is not a real product screen,
-              route, form, auth flow, map tool, chat, poll, deck setup, or game
-              setup experience.
+            <p className="max-w-4xl text-lg leading-8 text-muted-foreground">
+              This temporary page only checks reusable card treatments with
+              mock display data. It is not a real dashboard, lobby, route, game
+              creation flow, auth flow, Supabase integration, map tool, chat,
+              poll system, or game state implementation.
             </p>
           </div>
         </section>
 
-        <Card aria-labelledby="tabs-states" variant="raised">
-          <CardHeader>
-            <CardTitle id="tabs-states">Tabs States</CardTitle>
-            <CardDescription>
-              Tabs provide a list, triggers, panels, selected styling, disabled
-              treatment, keyboard movement, and a lightweight count slot without
-              becoming a real right rail or mobile shell.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="gap-5">
-            <Tabs defaultValue="chat">
-              <TabsList aria-label="Placeholder panel tabs">
-                <TabsTrigger value="chat" badge="3">
-                  Chat
-                </TabsTrigger>
-                <TabsTrigger value="state">State</TabsTrigger>
-                <TabsTrigger value="history" badge="12">
-                  History
-                </TabsTrigger>
-                <TabsTrigger value="disabled" disabled>
-                  Disabled
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="chat">
-                <p>
-                  Placeholder panel for a future conversational surface. This
-                  sample does not render messages, realtime wiring, or product
-                  behavior.
-                </p>
-              </TabsContent>
-              <TabsContent value="state">
-                <p>
-                  Placeholder panel for later state information. This sample
-                  does not create resources, projects, discontent, or official
-                  records.
-                </p>
-              </TabsContent>
-              <TabsContent value="history">
-                <p>
-                  Placeholder panel for a future ledger-style history view.
-                  This sample does not include official turn content or private
-                  proof-of-concept material.
-                </p>
-              </TabsContent>
-              <TabsContent value="disabled">
-                <p>
-                  This disabled tab panel remains unreachable from the sample
-                  controls.
-                </p>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        <DashboardSection
+          title="GameCard States"
+          description="Placeholder examples for future dashboard groupings and action surfaces."
+          count={gameCards.length}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            {gameCards.map((game) => (
+              <GameCard key={game.name} game={game} />
+            ))}
+          </div>
+        </DashboardSection>
 
-        <Card aria-labelledby="segmented-control-states" variant="raised">
-          <CardHeader>
-            <CardTitle id="segmented-control-states">
-              Segmented Control States
-            </CardTitle>
-            <CardDescription>
-              Segmented controls use native radio inputs for compact method and
-              mode choices. Selected options have shape, border, underline, and
-              text-weight changes in addition to token color.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="gap-5">
-            <div className="flex flex-col gap-3">
-              <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-                Method choice placeholder
-              </p>
-              <SegmentedControl
-                aria-label="Placeholder method choice"
-                defaultValue="guided"
-                options={methodOptions}
-              />
-            </div>
-            <div className="flex flex-col gap-3">
-              <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-                Compact mode placeholder
-              </p>
-              <SegmentedControl
-                aria-label="Placeholder compact mode choice"
-                defaultValue="balanced"
-                options={densityOptions}
-                size="sm"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardSection
+          title="SetupChecklistCard States"
+          description="Placeholder examples for future lobby setup validation and status review."
+          count={setupItems.length}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            {setupItems.map((item) => (
+              <SetupChecklistCard key={item.title} item={item} />
+            ))}
+          </div>
+        </DashboardSection>
 
-        <Card aria-labelledby="keyboard-notes" variant="raised">
-          <CardHeader>
-            <CardTitle id="keyboard-notes">Keyboard Notes</CardTitle>
-            <CardDescription>
-              Placeholder behavior notes for this primitive slice.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col gap-2 text-muted-foreground">
-              <li>
-                Tabs support arrow-key movement, Home, and End while skipping
-                disabled triggers.
-              </li>
-              <li>
-                Segmented controls use native radio behavior, so Tab reaches the
-                group and arrow keys move between enabled options.
-              </li>
-              <li>
-                Focus states use the shared token ring from the app theme.
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+        <DashboardSection
+          title="DashboardSection Empty State"
+          description="Tiny wrapper support for sections that have no mock cards yet."
+          count={0}
+          emptyState={
+            <EmptyState
+              title="No placeholder cards in this section"
+              description="This empty state only demonstrates section composition. It does not create or join a game."
+              variant="neutral"
+            />
+          }
+        />
 
         <section className="rounded-lg border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
           Placeholder content only. No official or proprietary game content,
