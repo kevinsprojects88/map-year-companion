@@ -1,164 +1,320 @@
-import { ProcessVoteCard } from "@/components/polls/process-vote-card";
-import type { ProcessVoteResponse, ProcessVoteViewModel } from "@/types/process-vote";
+import { CurrentTurnPanel } from "@/components/turns/current-turn-panel";
+import type { CurrentTurnPanelViewModel } from "@/types/turn";
 
-function responses(
-  yes: number,
-  no: number,
-  abstain: number,
-  selected?: ProcessVoteResponse["value"]
-): ProcessVoteResponse[] {
-  return [
-    {
-      count: yes,
-      currentUserSelected: selected === "yes",
-      label: "Yes",
-      value: "yes"
-    },
-    {
-      count: no,
-      currentUserSelected: selected === "no",
-      label: "No",
-      value: "no"
-    },
-    {
-      count: abstain,
-      currentUserSelected: selected === "abstain",
-      label: "Abstain",
-      value: "abstain"
-    }
-  ];
-}
+const passiveActions = [
+  "Discuss the turn in chat.",
+  "Vote in advisory Story Polls when one is open.",
+  "Inspect saved drafts without editing them.",
+  "Review state and official history."
+];
 
-const processVotes: ProcessVoteViewModel[] = [
+const turnPanels: CurrentTurnPanelViewModel[] = [
   {
-    confirmationCopy:
-      "Owner/admin review is still required before any reassignment can happen.",
-    createdAtLabel: "Created 18 minutes ago",
-    currentActivePlayerLabel: "Current placeholder player",
-    id: "open-reassign-stuck-turn",
-    initiatedByLabel: "owner/admin placeholder",
-    primaryActionLabel: "Mock Response Only",
-    proposedReplacementPlayerLabel: "Next placeholder player",
-    reason:
-      "The current turn has been quiet in this mock scenario, so the table is gathering governance input.",
-    responses: responses(2, 1, 1),
-    resultCopy:
-      "No fictional outcome, map change, turn advance, or official history entry is created by this vote.",
-    status: "open",
-    statusDetail:
-      "Open process vote state with local yes/no/abstain controls for visual testing only.",
-    thresholdCopy:
-      "Responses inform the owner/admin decision; this demo does not enforce a rule or submit a vote.",
-    title: "Process Vote: Reassign Stuck Turn",
-    totalResponses: 4,
-    type: "reassignStuckTurn"
+    actionCopy:
+      "The active player can keep a provisional outcome here, then commit only when the table is ready.",
+    activePlayerLabel: "Rowan placeholder",
+    checklist: [
+      {
+        description: "Read the mock prompt area before drafting.",
+        id: "active-review-prompt",
+        label: "Review current prompt",
+        status: "complete"
+      },
+      {
+        description: "Use chat outside this primitive for table discussion.",
+        id: "active-discuss",
+        label: "Discuss with the table",
+        status: "current"
+      },
+      {
+        description: "Save a provisional version before final commit.",
+        id: "active-save-draft",
+        label: "Save draft outcome",
+        status: "notStarted"
+      },
+      {
+        description: "Map review is represented only as placeholder copy.",
+        id: "active-review-map",
+        label: "Review map changes",
+        status: "notStarted"
+      },
+      {
+        description: "Commit remains a mock button with no action handler.",
+        id: "active-commit",
+        label: "Commit and advance",
+        status: "notStarted"
+      }
+    ],
+    commitAndAdvanceLabel: "Commit & Advance",
+    draft: {
+      body:
+        "Draft placeholder: the community notices a new mark at the edge of the shared map and agrees to discuss what it means.",
+      helperText:
+        "Draft/provisional copy. It is editable-looking for the active player and does not represent official history.",
+      savedAtLabel: undefined
+    },
+    gameName: "Placeholder World Ledger",
+    id: "active-player",
+    promptDetail:
+      "Prompt placeholder only: describe a quiet change the community has noticed. Do not treat this as official card text.",
+    promptLabel: "Mock current prompt",
+    saveDraftLabel: "Save Draft",
+    status: "active",
+    storyPoll: {
+      detail: "No advisory Story Poll is open for this mock turn.",
+      status: "none"
+    },
+    turnLabel: "Week 03 / Active Turn",
+    viewerState: "activePlayer"
   },
   {
-    confirmationCopy:
-      "Responses indicate support, but the final owner/admin confirmation has not happened.",
-    createdAtLabel: "Created 42 minutes ago",
-    currentActivePlayerLabel: "Current placeholder player",
-    id: "confirmation-needed-reassign-stuck-turn",
-    initiatedByLabel: "owner/admin placeholder",
-    primaryActionLabel: "Review Confirmation",
-    proposedReplacementPlayerLabel: "Replacement placeholder player",
-    reason:
-      "The table has responded, and this mock card shows the waiting-for-confirmation state.",
-    responses: responses(4, 1, 1, "yes"),
-    resultCopy:
-      "The proposed reassignment is not active until owner/admin confirmation is complete.",
-    status: "confirmationNeeded",
-    statusDetail:
-      "Confirmation-needed state. The vote itself still does not create story text or official history.",
-    thresholdCopy:
-      "The mock response count supports escalation to owner/admin confirmation.",
-    title: "Process Vote: Confirm Reassignment",
-    totalResponses: 6,
-    type: "reassignStuckTurn"
+    actionCopy:
+      "Passive players can read the turn context and respond elsewhere, but the official turn controls stay disabled.",
+    activePlayerLabel: "Mira placeholder",
+    checklist: [
+      {
+        description: "The current placeholder prompt has been reviewed.",
+        id: "passive-review-prompt",
+        label: "Review current prompt",
+        status: "complete"
+      },
+      {
+        description: "Table discussion is still available outside this panel.",
+        id: "passive-discuss",
+        label: "Discuss with the table",
+        status: "current"
+      },
+      {
+        description: "Only the active player can save a new draft.",
+        id: "passive-save-draft",
+        label: "Save draft outcome",
+        status: "notStarted"
+      },
+      {
+        description: "Passive players can inspect saved map notes later.",
+        id: "passive-review-map",
+        label: "Review map changes",
+        status: "notStarted"
+      },
+      {
+        description: "Only the active player can commit official changes.",
+        id: "passive-commit",
+        label: "Commit and advance",
+        status: "notStarted"
+      }
+    ],
+    commitAndAdvanceLabel: "Commit & Advance",
+    disabledReason:
+      "You are viewing as a passive player. Discussion, voting, draft inspection, and history review remain available; Save Draft and Commit & Advance do not.",
+    draft: {
+      body:
+        "Saved draft preview placeholder: a possible outcome is visible for the table to inspect, but passive players cannot edit it.",
+      helperText:
+        "Passive-player read-only treatment. The draft remains provisional and separate from official history.",
+      savedAtLabel: "Saved 14 minutes ago"
+    },
+    gameName: "Placeholder World Ledger",
+    id: "passive-player",
+    passiveAvailableActions: passiveActions,
+    promptDetail:
+      "Prompt placeholder only: the table is considering a community observation. No official prompt or private content appears here.",
+    promptLabel: "Mock current prompt",
+    saveDraftLabel: "Save Draft",
+    status: "active",
+    storyPoll: {
+      detail:
+        "An advisory Community Vote is open in this mock state. It does not decide or apply the turn outcome.",
+      linkLabel: "View Mock Story Poll",
+      status: "open"
+    },
+    turnLabel: "Week 04 / Passive View",
+    viewerState: "passivePlayer"
   },
   {
-    confirmationCopy:
-      "Owner/admin confirmation is shown as complete in this placeholder card.",
-    createdAtLabel: "Settled this morning",
-    currentActivePlayerLabel: "Former placeholder player",
-    id: "passed-reassign-stuck-turn",
-    initiatedByLabel: "owner/admin placeholder",
-    proposedReplacementPlayerLabel: "Replacement placeholder player",
-    reason:
-      "The mock governance process reached a settled passed state for visual review.",
-    responses: responses(5, 1, 0, "yes"),
-    resultCopy:
-      "Passed means the admin action is settled; it still is not a fictional outcome or Story Poll result.",
-    status: "passed",
-    statusDetail:
-      "Passed process vote state with disabled response controls and settled governance copy.",
-    thresholdCopy: "The placeholder response threshold was met in this mock state.",
-    title: "Process Vote: Reassignment Passed",
-    totalResponses: 6,
-    type: "reassignStuckTurn"
+    actionCopy:
+      "The active player has saved a provisional draft and can choose whether to revise it or commit later.",
+    activePlayerLabel: "Talia placeholder",
+    checklist: [
+      {
+        description: "The placeholder prompt has been reviewed.",
+        id: "draft-review-prompt",
+        label: "Review current prompt",
+        status: "complete"
+      },
+      {
+        description: "The table has had a chance to respond.",
+        id: "draft-discuss",
+        label: "Discuss with the table",
+        status: "complete"
+      },
+      {
+        description: "A visible provisional draft has been saved.",
+        id: "draft-save-draft",
+        label: "Save draft outcome",
+        status: "complete"
+      },
+      {
+        description: "Map notes still need an active-player review.",
+        id: "draft-review-map",
+        label: "Review map changes",
+        status: "current"
+      },
+      {
+        description: "Commit is available as a visual mock button only.",
+        id: "draft-commit",
+        label: "Commit and advance",
+        status: "notStarted"
+      }
+    ],
+    commitAndAdvanceLabel: "Commit & Advance",
+    draft: {
+      body:
+        "Saved draft placeholder: the proposed turn outcome is shared for review, with map and state notes still provisional.",
+      helperText:
+        "Draft saved treatment uses a dashed/provisional surface plus timestamp. Official history remains unchanged.",
+      savedAtLabel: "Saved 3 minutes ago"
+    },
+    gameName: "Placeholder World Ledger",
+    id: "draft-saved",
+    promptDetail:
+      "Prompt placeholder only: describe a small tension around a shared resource. This is invented demo copy.",
+    promptLabel: "Mock current prompt",
+    saveDraftLabel: "Save Draft",
+    status: "draftSaved",
+    storyPoll: {
+      detail:
+        "A mock advisory poll has closed. Its result is visible for context only and has no automatic effect.",
+      linkLabel: "Review Closed Mock Poll",
+      status: "closed"
+    },
+    turnLabel: "Week 05 / Draft Saved",
+    viewerState: "activePlayer"
   },
   {
-    confirmationCopy:
-      "Owner/admin confirmation is not available because the process vote failed.",
-    createdAtLabel: "Settled yesterday",
-    currentActivePlayerLabel: "Current placeholder player",
-    id: "failed-reassign-stuck-turn",
-    initiatedByLabel: "owner/admin placeholder",
-    proposedReplacementPlayerLabel: "Replacement placeholder player",
-    reason:
-      "The table response did not support the proposed admin action in this mock state.",
-    responses: responses(1, 4, 1, "no"),
-    resultCopy:
-      "Failed means the proposed reassignment is not carried forward by this process vote.",
-    status: "failed",
-    statusDetail:
-      "Failed state uses text labels and copy, not color alone, to communicate the outcome.",
-    thresholdCopy: "The placeholder response threshold was not met.",
-    title: "Process Vote: Reassignment Failed",
-    totalResponses: 6,
-    type: "reassignStuckTurn"
+    actionCopy:
+      "This state shows a needs-attention turn where the active player must resolve a blocked checklist item before committing.",
+    activePlayerLabel: "Sol placeholder",
+    checklist: [
+      {
+        description: "The prompt has been reviewed.",
+        id: "blocked-review-prompt",
+        label: "Review current prompt",
+        status: "complete"
+      },
+      {
+        description: "The table is still discussing an unresolved note.",
+        id: "blocked-discuss",
+        label: "Discuss with the table",
+        status: "current"
+      },
+      {
+        description: "A draft exists, but it needs a correction.",
+        id: "blocked-save-draft",
+        label: "Save draft outcome",
+        status: "blocked"
+      },
+      {
+        description: "Map review is blocked until the draft note is settled.",
+        id: "blocked-review-map",
+        label: "Review map changes",
+        status: "blocked"
+      },
+      {
+        description: "Commit stays disabled in this needs-attention state.",
+        id: "blocked-commit",
+        label: "Commit and advance",
+        status: "blocked"
+      }
+    ],
+    commitAndAdvanceLabel: "Commit & Advance",
+    disabledReason:
+      "Needs attention: review the blocked checklist items before committing this mock turn.",
+    draft: {
+      body:
+        "Attention placeholder: this draft has a missing clarification, so Commit & Advance remains disabled in the demo.",
+      helperText:
+        "Needs-attention treatment uses explicit text, a warning panel, and blocked checklist labels rather than color alone.",
+      savedAtLabel: "Saved with attention needed"
+    },
+    gameName: "Placeholder World Ledger",
+    id: "needs-attention",
+    promptDetail:
+      "Prompt placeholder only: the community notices an unresolved detail near an existing map note.",
+    promptLabel: "Mock current prompt",
+    saveDraftLabel: "Save Draft",
+    status: "needsAttention",
+    storyPoll: {
+      detail:
+        "No active Story Poll is attached to this attention state; the issue is procedural in this mock panel.",
+      status: "none"
+    },
+    turnLabel: "Week 06 / Needs Attention",
+    viewerState: "activePlayer"
   },
   {
-    confirmationCopy:
-      "Owner/admin cancelled the process before any final reassignment decision.",
-    createdAtLabel: "Cancelled last week",
-    currentActivePlayerLabel: "Current placeholder player",
-    id: "cancelled-reassign-stuck-turn",
-    initiatedByLabel: "owner/admin placeholder",
-    proposedReplacementPlayerLabel: "Replacement placeholder player",
-    reason:
-      "The mock admin issue was resolved outside the process vote before confirmation.",
-    responses: responses(2, 0, 2, "abstain"),
-    resultCopy:
-      "Cancelled process votes remain administration notes and do not produce story consequences.",
-    status: "cancelled",
-    statusDetail:
-      "Cancelled state is settled and disabled so the demo does not imply a live flow.",
-    thresholdCopy: "No threshold applies after cancellation.",
-    title: "Process Vote: Reassignment Cancelled",
-    totalResponses: 4,
-    type: "reassignStuckTurn"
-  },
-  {
-    confirmationCopy:
-      "This older process vote is read-only and accepts no new responses.",
-    createdAtLabel: "Archived 3 months ago",
-    currentActivePlayerLabel: "Archived placeholder player",
-    id: "readonly-reassign-stuck-turn",
-    initiatedByLabel: "owner/admin placeholder",
-    proposedReplacementPlayerLabel: "Archived replacement player",
-    reason:
-      "Read-only presentation for an archived governance card in a completed placeholder world.",
-    responses: responses(3, 1, 1, "yes"),
-    resultCopy:
-      "The archived card records table administration only; it is not part of official fictional history.",
-    status: "readOnly",
-    statusDetail:
-      "Read-only state for archived or completed records with response controls disabled.",
-    thresholdCopy: "The archived threshold note is preserved for reference only.",
-    title: "Process Vote: Archived Reassignment Record",
-    totalResponses: 5,
-    type: "reassignStuckTurn"
+    actionCopy:
+      "Completed turns are official records. The draft area becomes settled copy and all controls remain disabled.",
+    activePlayerLabel: "Ilan placeholder",
+    checklist: [
+      {
+        description: "The prompt was reviewed during the completed turn.",
+        id: "readonly-review-prompt",
+        label: "Review current prompt",
+        status: "complete"
+      },
+      {
+        description: "The table discussion is preserved outside official history.",
+        id: "readonly-discuss",
+        label: "Discuss with the table",
+        status: "complete"
+      },
+      {
+        description: "The draft was saved before final commit.",
+        id: "readonly-save-draft",
+        label: "Save draft outcome",
+        status: "complete"
+      },
+      {
+        description: "Map changes are represented as settled review copy.",
+        id: "readonly-review-map",
+        label: "Review map changes",
+        status: "complete"
+      },
+      {
+        description: "The turn has already advanced in this mock record.",
+        id: "readonly-commit",
+        label: "Commit and advance",
+        status: "complete"
+      }
+    ],
+    commitAndAdvanceLabel: "Commit & Advance",
+    draft: {
+      body:
+        "Official record placeholder: the outcome is settled and read-only, with draft styling removed.",
+      helperText:
+        "Official/read-only treatment uses a stable ledger surface and makes clear that controls are unavailable.",
+      savedAtLabel: "Committed yesterday"
+    },
+    gameName: "Placeholder World Ledger",
+    id: "read-only-completed",
+    passiveAvailableActions: [
+      "Review the official record.",
+      "Inspect archived state and history.",
+      "Read preserved discussion separately from official history."
+    ],
+    promptDetail:
+      "Prompt placeholder only: archived context is preserved without official card text.",
+    promptLabel: "Archived prompt placeholder",
+    saveDraftLabel: "Save Draft",
+    status: "completed",
+    storyPoll: {
+      detail:
+        "A closed advisory poll may be reviewed as context, but it remains separate from the official record.",
+      linkLabel: "Review Archived Mock Poll",
+      status: "closed"
+    },
+    turnLabel: "Week 02 / Completed Record",
+    viewerState: "readOnly"
   }
 ];
 
@@ -168,18 +324,17 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1I placeholder design-system demo
+            Phase 1J placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-4xl text-4xl font-semibold sm:text-5xl">
-              ProcessVoteCard Primitive
+              CurrentTurnPanel Primitive
             </h1>
             <p className="max-w-4xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks governance/admin process vote
-              component treatments with mock display data. It is not a real
-              process vote flow, Story Poll flow, chat integration, auth flow,
-              Supabase integration, turn reassignment system, map tool, game
-              state implementation, or official history surface.
+              This temporary page only checks mock current-turn panel states. It
+              is not a real game board, turn engine, auth flow, Supabase
+              integration, Story Poll implementation, chat integration, map
+              editor, realtime surface, route, or official history system.
             </p>
           </div>
         </section>
@@ -187,19 +342,19 @@ export default function Home() {
         <section className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-              Mock Process Vote States
+              Mock Current Turn States
             </p>
-            <h2 className="text-2xl font-semibold">Reassign Stuck Turn</h2>
+            <h2 className="text-2xl font-semibold">Turn Panel Gallery</h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              Placeholder cards for open, confirmation-needed, passed, failed,
-              cancelled, and read-only states. All copy treats the vote as
-              table administration rather than story input.
+              Placeholder examples for active-player, passive-player,
+              draft-saved, needs-attention, and read-only completed states. All
+              controls are visual only.
             </p>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-2">
-            {processVotes.map((vote) => (
-              <ProcessVoteCard key={vote.id} vote={vote} />
+          <div className="grid gap-5 xl:grid-cols-2">
+            {turnPanels.map((turn) => (
+              <CurrentTurnPanel key={turn.id} turn={turn} />
             ))}
           </div>
         </section>
@@ -207,8 +362,8 @@ export default function Home() {
         <section className="rounded-lg border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
           Placeholder content only. No official or proprietary game content,
           private proof-of-concept data, secrets, auth wiring, Supabase schema,
-          chat, Story Poll behavior, vote submission, turn reassignment logic,
-          map editing, or game creation features are included.
+          turn persistence, Story Poll behavior, chat, realtime, map editing, or
+          game creation features are included.
         </section>
       </div>
     </main>
