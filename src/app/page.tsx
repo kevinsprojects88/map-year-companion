@@ -1,203 +1,164 @@
-import { DashboardSection } from "@/components/dashboard/dashboard-section";
-import { GameCard } from "@/components/dashboard/game-card";
-import { SetupChecklistCard } from "@/components/lobby/setup-checklist-card";
-import { EmptyState } from "@/components/feedback/empty-state";
-import { StoryPollCard } from "@/components/polls/story-poll-card";
-import type { GameCardViewModel } from "@/types/game";
-import type { StoryPollViewModel } from "@/types/poll";
-import type { SetupChecklistItem } from "@/types/setup";
+import { ProcessVoteCard } from "@/components/polls/process-vote-card";
+import type { ProcessVoteResponse, ProcessVoteViewModel } from "@/types/process-vote";
 
-const gameCards: GameCardViewModel[] = [
-  {
-    activePlayerLabel: "Active player: Rowan",
-    indicators: {
-      hasDraft: true,
-      hasActiveStoryPoll: true
+function responses(
+  yes: number,
+  no: number,
+  abstain: number,
+  selected?: ProcessVoteResponse["value"]
+): ProcessVoteResponse[] {
+  return [
+    {
+      count: yes,
+      currentUserSelected: selected === "yes",
+      label: "Yes",
+      value: "yes"
     },
-    lastUpdatedLabel: "Updated 18 minutes ago",
-    name: "North Ridge Field Notes",
-    playerCountLabel: "4 players",
-    primaryActionLabel: "Resume Turn",
-    status: "yourTurn",
-    turnLabel: "Week 3, Turn 2"
-  },
-  {
-    activePlayerLabel: "Active player: Mira",
-    indicators: {
-      hasDraft: true
+    {
+      count: no,
+      currentUserSelected: selected === "no",
+      label: "No",
+      value: "no"
     },
-    lastUpdatedLabel: "Updated this morning",
-    name: "Harbor Map Study",
-    playerCountLabel: "5 players",
-    primaryActionLabel: "Open Game",
-    status: "active",
-    turnLabel: "Week 5, Turn 1"
-  },
-  {
-    activePlayerLabel: "Waiting for a final player confirmation",
-    lastUpdatedLabel: "Updated yesterday",
-    name: "Riverbend Setup",
-    playerCountLabel: "3 players",
-    primaryActionLabel: "Review Setup",
-    status: "waitingToStart",
-    turnLabel: "Lobby checklist"
-  },
-  {
-    activePlayerLabel: "Process vote needs review",
-    indicators: {
-      hasProcessVote: true,
-      needsAttention: true
-    },
-    lastUpdatedLabel: "Updated 2 hours ago",
-    name: "Low Meadow Notebook",
-    playerCountLabel: "4 players",
-    primaryActionLabel: "Review Vote",
-    status: "needsAttention",
-    turnLabel: "Week 7, Turn 3"
-  },
-  {
-    activePlayerLabel: "Completed world",
-    lastUpdatedLabel: "Completed last week",
-    name: "Old Mill Archive",
-    playerCountLabel: "4 players",
-    primaryActionLabel: "Read Archive",
-    status: "completed",
-    turnLabel: "Final archive"
-  },
-  {
-    activePlayerLabel: "Read-only record",
-    lastUpdatedLabel: "Archived 3 months ago",
-    name: "Cedar Hollow Record",
-    playerCountLabel: "2 players",
-    primaryActionLabel: "Open Record",
-    status: "archived",
-    turnLabel: "Settled archive"
-  }
-];
+    {
+      count: abstain,
+      currentUserSelected: selected === "abstain",
+      label: "Abstain",
+      value: "abstain"
+    }
+  ];
+}
 
-const setupItems: SetupChecklistItem[] = [
+const processVotes: ProcessVoteViewModel[] = [
   {
-    actionLabel: "Review",
-    description:
-      "The name, short description, and shared intent are ready for the group.",
-    requirement: "required",
-    status: "complete",
-    title: "Game Information",
-    validationMessages: ["Required fields are filled in."]
-  },
-  {
-    actionLabel: "Invite",
-    description:
-      "A private invite link can be shared once the player list is ready.",
-    requirement: "required",
-    status: "incomplete",
-    title: "Invite Players",
-    validationMessages: ["At least one invited player is still pending."]
-  },
-  {
-    actionLabel: "Adjust",
-    description:
-      "The order is saved, but the group can still revise it before starting.",
-    requirement: "required",
-    status: "warning",
-    title: "Turn Order",
-    validationMessages: [
-      "One player appears twice in the placeholder order.",
-      "Confirm the first active player before starting."
-    ]
-  },
-  {
-    actionLabel: "Resolve",
-    description:
-      "The placeholder deck import has structural issues that block start.",
-    requirement: "required",
-    status: "blocked",
-    title: "Deck Setup",
-    validationMessages: [
-      "The placeholder JSON shape is incomplete.",
-      "No official or proprietary content is included in this demo."
-    ]
-  },
-  {
-    actionLabel: "Add Note",
-    description:
-      "Optional table notes can be recorded for later reference by the group.",
-    requirement: "optional",
-    status: "optional",
-    title: "Community Notes",
-    validationMessages: ["This can remain blank for now."]
-  }
-];
-
-const storyPolls: StoryPollViewModel[] = [
-  {
-    createdAtLabel: "Created 12 minutes ago",
-    createdByLabel: "active player Rowan",
-    description:
-      "The group is weighing which conversation thread feels most useful before the turn is committed.",
-    id: "shoreline-detail",
-    options: [
-      { id: "old-pier", label: "Follow up on the old pier marker", voteCount: 3 },
-      { id: "fog-bank", label: "Ask what the fog bank has changed", voteCount: 1 },
-      { id: "supply-cache", label: "Discuss the supply cache rumor", voteCount: 0 }
-    ],
-    question: "Which shoreline detail should guide the next table discussion?",
+    confirmationCopy:
+      "Owner/admin review is still required before any reassignment can happen.",
+    createdAtLabel: "Created 18 minutes ago",
+    currentActivePlayerLabel: "Current placeholder player",
+    id: "open-reassign-stuck-turn",
+    initiatedByLabel: "owner/admin placeholder",
+    primaryActionLabel: "Mock Response Only",
+    proposedReplacementPlayerLabel: "Next placeholder player",
+    reason:
+      "The current turn has been quiet in this mock scenario, so the table is gathering governance input.",
+    responses: responses(2, 1, 1),
+    resultCopy:
+      "No fictional outcome, map change, turn advance, or official history entry is created by this vote.",
     status: "open",
     statusDetail:
-      "Open for advisory input. The active player still decides what becomes part of the committed turn.",
-    totalVotes: 4
+      "Open process vote state with local yes/no/abstain controls for visual testing only.",
+    thresholdCopy:
+      "Responses inform the owner/admin decision; this demo does not enforce a rule or submit a vote.",
+    title: "Process Vote: Reassign Stuck Turn",
+    totalResponses: 4,
+    type: "reassignStuckTurn"
   },
   {
-    createdAtLabel: "Created 34 minutes ago",
-    createdByLabel: "active player Mira",
-    currentUserVoteOptionId: "market-garden",
-    description:
-      "This vote records the group mood without approving or rejecting any official outcome.",
-    id: "shared-work",
-    options: [
-      { id: "market-garden", label: "Talk through a shared market garden", voteCount: 2 },
-      { id: "watch-post", label: "Talk through a small watch post", voteCount: 1 },
-      { id: "rain-cistern", label: "Talk through a rain cistern", voteCount: 1 }
-    ],
-    question: "Which community effort feels most worth discussing first?",
-    status: "voted",
+    confirmationCopy:
+      "Responses indicate support, but the final owner/admin confirmation has not happened.",
+    createdAtLabel: "Created 42 minutes ago",
+    currentActivePlayerLabel: "Current placeholder player",
+    id: "confirmation-needed-reassign-stuck-turn",
+    initiatedByLabel: "owner/admin placeholder",
+    primaryActionLabel: "Review Confirmation",
+    proposedReplacementPlayerLabel: "Replacement placeholder player",
+    reason:
+      "The table has responded, and this mock card shows the waiting-for-confirmation state.",
+    responses: responses(4, 1, 1, "yes"),
+    resultCopy:
+      "The proposed reassignment is not active until owner/admin confirmation is complete.",
+    status: "confirmationNeeded",
     statusDetail:
-      "Your advisory vote is recorded. It does not bind the active player or change the map by itself.",
-    totalVotes: 4
+      "Confirmation-needed state. The vote itself still does not create story text or official history.",
+    thresholdCopy:
+      "The mock response count supports escalation to owner/admin confirmation.",
+    title: "Process Vote: Confirm Reassignment",
+    totalResponses: 6,
+    type: "reassignStuckTurn"
   },
   {
-    createdAtLabel: "Closed this morning",
-    createdByLabel: "active player Ellis",
-    currentUserVoteOptionId: "listen",
-    description:
-      "Closed polls remain chat context and are not official ledger entries.",
-    id: "meeting-tone",
-    options: [
-      { id: "listen", label: "Spend more time listening", voteCount: 4 },
-      { id: "trade", label: "Focus on practical trade details", voteCount: 2 },
-      { id: "boundary", label: "Clarify the group boundary", voteCount: 1 }
-    ],
-    question: "What tone should the next conversation hold?",
-    status: "closed",
+    confirmationCopy:
+      "Owner/admin confirmation is shown as complete in this placeholder card.",
+    createdAtLabel: "Settled this morning",
+    currentActivePlayerLabel: "Former placeholder player",
+    id: "passed-reassign-stuck-turn",
+    initiatedByLabel: "owner/admin placeholder",
+    proposedReplacementPlayerLabel: "Replacement placeholder player",
+    reason:
+      "The mock governance process reached a settled passed state for visual review.",
+    responses: responses(5, 1, 0, "yes"),
+    resultCopy:
+      "Passed means the admin action is settled; it still is not a fictional outcome or Story Poll result.",
+    status: "passed",
     statusDetail:
-      "Closed by the active player. Results are preserved as chat context only.",
-    totalVotes: 7
+      "Passed process vote state with disabled response controls and settled governance copy.",
+    thresholdCopy: "The placeholder response threshold was met in this mock state.",
+    title: "Process Vote: Reassignment Passed",
+    totalResponses: 6,
+    type: "reassignStuckTurn"
   },
   {
-    createdAtLabel: "Archived last week",
-    createdByLabel: "active player Jun",
-    description:
-      "Read-only presentation for archived chat where no new input is accepted.",
-    id: "archive-note",
-    options: [
-      { id: "record", label: "Record the question for later reflection", voteCount: 3 },
-      { id: "move-on", label: "Move on without another note", voteCount: 1 }
-    ],
-    question: "How should this older discussion be preserved?",
+    confirmationCopy:
+      "Owner/admin confirmation is not available because the process vote failed.",
+    createdAtLabel: "Settled yesterday",
+    currentActivePlayerLabel: "Current placeholder player",
+    id: "failed-reassign-stuck-turn",
+    initiatedByLabel: "owner/admin placeholder",
+    proposedReplacementPlayerLabel: "Replacement placeholder player",
+    reason:
+      "The table response did not support the proposed admin action in this mock state.",
+    responses: responses(1, 4, 1, "no"),
+    resultCopy:
+      "Failed means the proposed reassignment is not carried forward by this process vote.",
+    status: "failed",
+    statusDetail:
+      "Failed state uses text labels and copy, not color alone, to communicate the outcome.",
+    thresholdCopy: "The placeholder response threshold was not met.",
+    title: "Process Vote: Reassignment Failed",
+    totalResponses: 6,
+    type: "reassignStuckTurn"
+  },
+  {
+    confirmationCopy:
+      "Owner/admin cancelled the process before any final reassignment decision.",
+    createdAtLabel: "Cancelled last week",
+    currentActivePlayerLabel: "Current placeholder player",
+    id: "cancelled-reassign-stuck-turn",
+    initiatedByLabel: "owner/admin placeholder",
+    proposedReplacementPlayerLabel: "Replacement placeholder player",
+    reason:
+      "The mock admin issue was resolved outside the process vote before confirmation.",
+    responses: responses(2, 0, 2, "abstain"),
+    resultCopy:
+      "Cancelled process votes remain administration notes and do not produce story consequences.",
+    status: "cancelled",
+    statusDetail:
+      "Cancelled state is settled and disabled so the demo does not imply a live flow.",
+    thresholdCopy: "No threshold applies after cancellation.",
+    title: "Process Vote: Reassignment Cancelled",
+    totalResponses: 4,
+    type: "reassignStuckTurn"
+  },
+  {
+    confirmationCopy:
+      "This older process vote is read-only and accepts no new responses.",
+    createdAtLabel: "Archived 3 months ago",
+    currentActivePlayerLabel: "Archived placeholder player",
+    id: "readonly-reassign-stuck-turn",
+    initiatedByLabel: "owner/admin placeholder",
+    proposedReplacementPlayerLabel: "Archived replacement player",
+    reason:
+      "Read-only presentation for an archived governance card in a completed placeholder world.",
+    responses: responses(3, 1, 1, "yes"),
+    resultCopy:
+      "The archived card records table administration only; it is not part of official fictional history.",
     status: "readOnly",
     statusDetail:
-      "Read-only archive state. The poll is settled conversation, not official history.",
-    totalVotes: 4
+      "Read-only state for archived or completed records with response controls disabled.",
+    thresholdCopy: "The archived threshold note is preserved for reference only.",
+    title: "Process Vote: Archived Reassignment Record",
+    totalResponses: 5,
+    type: "reassignStuckTurn"
   }
 ];
 
@@ -207,75 +168,47 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1H placeholder design-system demo
+            Phase 1I placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-4xl text-4xl font-semibold sm:text-5xl">
-              StoryPollCard Primitive
+              ProcessVoteCard Primitive
             </h1>
             <p className="max-w-4xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks reusable component treatments
-              with mock display data. It is not a real dashboard, lobby, route,
-              game creation flow, auth flow, Supabase integration, map tool,
-              chat integration, vote submission, poll system, or game state
-              implementation.
+              This temporary page only checks governance/admin process vote
+              component treatments with mock display data. It is not a real
+              process vote flow, Story Poll flow, chat integration, auth flow,
+              Supabase integration, turn reassignment system, map tool, game
+              state implementation, or official history surface.
             </p>
           </div>
         </section>
 
-        <DashboardSection
-          title="StoryPollCard States"
-          description="Placeholder Community Vote cards for open, voted, closed, and read-only advisory poll states."
-          count={storyPolls.length}
-        >
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
+              Mock Process Vote States
+            </p>
+            <h2 className="text-2xl font-semibold">Reassign Stuck Turn</h2>
+            <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+              Placeholder cards for open, confirmation-needed, passed, failed,
+              cancelled, and read-only states. All copy treats the vote as
+              table administration rather than story input.
+            </p>
+          </div>
+
           <div className="grid gap-4 xl:grid-cols-2">
-            {storyPolls.map((poll) => (
-              <StoryPollCard key={poll.id} poll={poll} />
+            {processVotes.map((vote) => (
+              <ProcessVoteCard key={vote.id} vote={vote} />
             ))}
           </div>
-        </DashboardSection>
-
-        <DashboardSection
-          title="GameCard States"
-          description="Placeholder examples for future dashboard groupings and action surfaces."
-          count={gameCards.length}
-        >
-          <div className="grid gap-4 lg:grid-cols-2">
-            {gameCards.map((game) => (
-              <GameCard key={game.name} game={game} />
-            ))}
-          </div>
-        </DashboardSection>
-
-        <DashboardSection
-          title="SetupChecklistCard States"
-          description="Placeholder examples for future lobby setup validation and status review."
-          count={setupItems.length}
-        >
-          <div className="grid gap-4 lg:grid-cols-2">
-            {setupItems.map((item) => (
-              <SetupChecklistCard key={item.title} item={item} />
-            ))}
-          </div>
-        </DashboardSection>
-
-        <DashboardSection
-          title="DashboardSection Empty State"
-          description="Tiny wrapper support for sections that have no mock cards yet."
-          count={0}
-          emptyState={
-            <EmptyState
-              title="No placeholder cards in this section"
-              description="This empty state only demonstrates section composition. It does not create or join a game."
-              variant="neutral"
-            />
-          }
-        />
+        </section>
 
         <section className="rounded-lg border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
           Placeholder content only. No official or proprietary game content,
           private proof-of-concept data, secrets, auth wiring, Supabase schema,
-          chat, polls, map editing, or game creation features are included.
+          chat, Story Poll behavior, vote submission, turn reassignment logic,
+          map editing, or game creation features are included.
         </section>
       </div>
     </main>
