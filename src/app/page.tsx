@@ -1,155 +1,79 @@
-import { MapViewer } from "@/components/map/map-viewer";
-import type { MapViewerViewModel } from "@/types/map";
+import { ChatComposer } from "@/components/chat/chat-composer";
+import { ChatMessage } from "@/components/chat/chat-message";
+import { ChatPanel } from "@/components/chat/chat-panel";
+import { SystemMessage } from "@/components/chat/system-message";
+import type {
+  ChatMessageViewModel,
+  SystemMessageViewModel
+} from "@/types/chat";
 
-const mapShellDemos: MapViewerViewModel[] = [
+const chatMessages: ChatMessageViewModel[] = [
   {
-    description:
-      "A display-only shell for the earliest state before any placeholder marks exist.",
-    emptyState: {
-      description:
-        "No map labels, regions, routes, or notes are shown in this mock state.",
-      title: "No placeholder map marks yet"
-    },
-    id: "blank-map-demo",
-    status: "blank",
-    summary:
-      "Blank placeholder map. No saved map marks are visible in this design-system demo.",
-    title: "Blank Map State"
+    authorDisplayName: "Avery",
+    avatarColor: "moss",
+    avatarInitials: "AV",
+    body: "Placeholder table note about checking the shared map before writing anything into the record.",
+    id: "avery-normal",
+    linkedTurnLabel: "Week placeholder",
+    status: "normal",
+    timestampLabel: "10:12 AM"
   },
   {
-    description:
-      "A quiet read-only map surface with settled placeholder labels and no editing affordance.",
-    id: "readonly-map-demo",
-    landmarks: [
-      {
-        description: "Settled label used only for component display.",
-        id: "north-ridge",
-        kind: "region",
-        label: "North ridge",
-        position: { x: 29, y: 36 },
-        status: "official"
-      },
-      {
-        description: "Simple route mark without path editing behavior.",
-        id: "old-footpath",
-        kind: "route",
-        label: "Old footpath",
-        position: { x: 56, y: 47 },
-        status: "official"
-      },
-      {
-        description: "Mock landmark label for map-reader contrast.",
-        id: "shared-well",
-        kind: "landmark",
-        label: "Shared well",
-        position: { x: 69, y: 66 },
-        status: "official"
-      }
-    ],
-    lastUpdatedLabel: "Updated in placeholder review",
-    readOnlyDetail:
-      "You can inspect the current world, but only the active player can commit official map changes.",
-    readOnlyReason: "Read-only map.",
-    revision: {
-      detail: "Settled placeholder snapshot for display only.",
-      id: "revision-readonly",
-      label: "Map Revision 003",
-      status: "official",
-      turnLabel: "Turn placeholder",
-      updatedLabel: "Mock updated label"
-    },
-    status: "readOnly",
-    title: "Read-only Map State"
+    authorDisplayName: "Bryn",
+    avatarColor: "ochre",
+    avatarInitials: "BR",
+    body: "Edited placeholder message. This stays conversational and does not become official history.",
+    id: "bryn-edited",
+    status: "edited",
+    timestampLabel: "10:16 AM"
   },
   {
-    description:
-      "A saved draft is visible for inspection, but the map shell stays non-editable.",
-    id: "draft-visible-map-demo",
-    landmarks: [
-      {
-        description: "Provisional area label with dashed draft treatment.",
-        id: "draft-garden",
-        kind: "region",
-        label: "Garden note",
-        position: { x: 34, y: 44 },
-        status: "draft"
-      },
-      {
-        description: "Draft route label shown as saved but not official.",
-        id: "draft-trail",
-        kind: "route",
-        label: "Possible trail",
-        position: { x: 61, y: 33 },
-        status: "draft"
-      },
-      {
-        description: "Inspection-only note pin in the saved draft.",
-        id: "draft-lookout",
-        kind: "note",
-        label: "Lookout note",
-        position: { x: 75, y: 62 },
-        status: "draft"
-      }
-    ],
-    lastUpdatedLabel: "Draft saved 12 minutes ago",
-    readOnlyDetail:
-      "This saved draft can be inspected by passive players, but it has not become official history.",
-    readOnlyReason: "Draft-visible read-only map.",
-    revision: {
-      detail: "Provisional snapshot visible after a mock Save Draft event.",
-      id: "revision-draft-visible",
-      label: "Draft Map Revision 004",
-      status: "draft",
-      turnLabel: "Turn placeholder",
-      updatedLabel: "Saved draft label"
-    },
-    status: "draftVisible",
-    title: "Draft-visible Map State"
+    authorDisplayName: "Casey",
+    avatarColor: "clay",
+    avatarInitials: "CA",
+    body: "Pending placeholder reply while the interface shows a not-yet-settled chat state.",
+    id: "casey-pending",
+    linkedTurnLabel: "Turn note",
+    status: "pending",
+    timestampLabel: "10:18 AM"
   },
   {
-    description:
-      "A closed archive map shell with settled placeholder labels and no continued interaction.",
-    id: "archived-map-demo",
-    landmarks: [
-      {
-        description: "Archived area label retained for final review.",
-        id: "archive-hill",
-        kind: "region",
-        label: "Hill record",
-        position: { x: 27, y: 30 },
-        status: "archived"
-      },
-      {
-        description: "Archived resource label with read-only wording.",
-        id: "archive-storehouse",
-        kind: "resource",
-        label: "Storehouse record",
-        position: { x: 53, y: 58 },
-        status: "archived"
-      },
-      {
-        description: "Final route label shown without pan or zoom behavior.",
-        id: "archive-crossing",
-        kind: "route",
-        label: "Crossing record",
-        position: { x: 73, y: 42 },
-        status: "archived"
-      }
-    ],
-    lastUpdatedLabel: "Closed archive label",
-    readOnlyDetail:
-      "The archived map is settled for later review and cannot receive new official changes.",
-    readOnlyReason: "Archived map.",
-    revision: {
-      detail: "Final placeholder map snapshot for archive display.",
-      id: "revision-archived",
-      label: "Final Map Revision",
-      status: "archived",
-      turnLabel: "Final turn placeholder",
-      updatedLabel: "Archive close label"
-    },
-    status: "archived",
-    title: "Archived Map State"
+    authorDisplayName: "Devon",
+    avatarColor: "slate",
+    avatarInitials: "DV",
+    body: "Failed placeholder message. The visible label explains the failure without relying on color alone.",
+    id: "devon-failed",
+    status: "failed",
+    timestampLabel: "10:20 AM"
+  }
+];
+
+const systemMessages: SystemMessageViewModel[] = [
+  {
+    body: "Placeholder system note: chat remains discussion and does not change official history.",
+    id: "system-info",
+    timestampLabel: "10:14 AM",
+    type: "info"
+  },
+  {
+    body: "Placeholder process reminder: this message is informational and does not mutate game state.",
+    id: "system-process",
+    linkedObjectLabel: "Process placeholder",
+    timestampLabel: "10:22 AM",
+    type: "process"
+  },
+  {
+    body: "Placeholder warning state shown with text, border, and label so meaning is not color-only.",
+    id: "system-warning",
+    timestampLabel: "10:24 AM",
+    type: "warning"
+  },
+  {
+    body: "Placeholder state note shown in chat style, separate from the official ledger/history treatment.",
+    id: "system-state",
+    linkedObjectLabel: "State placeholder",
+    timestampLabel: "10:25 AM",
+    type: "stateChange"
   }
 ];
 
@@ -159,36 +83,125 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1M placeholder design-system demo
+            Phase 1N placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-4xl text-4xl font-semibold sm:text-5xl">
-              Map Viewer Shell Primitive
+              Chat Message and Composer Primitives
             </h1>
             <p className="max-w-4xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks mock map-viewer shell primitives,
-              revision labels, read-only messaging, disabled display controls,
-              and text summaries for placeholder map labels. It is not a real
-              game board, map editor, canvas library choice, pan or zoom system,
-              route, auth surface, Supabase integration, persistence layer,
-              draft implementation, commit flow, chat surface, realtime system,
-              or official map feature.
+              This temporary page only checks mock chat messages, system notes,
+              composer states, and an empty chat panel. It is not a real chat
+              screen, server action, realtime subscription, Supabase
+              integration, message history loader, Story Poll integration,
+              official history surface, route, game state update, turn
+              association system, or persistence layer.
             </p>
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-2">
-          {mapShellDemos.map((map) => (
-            <MapViewer key={map.id} map={map} />
-          ))}
+        <ChatPanel
+          title="Placeholder Table Discussion"
+          description="Mock player and system messages for visual review. Chat remains conversational and separate from official history."
+          messages={[
+            <ChatMessage key={chatMessages[0].id} message={chatMessages[0]} />,
+            <SystemMessage
+              key={systemMessages[0].id}
+              message={systemMessages[0]}
+            />,
+            <ChatMessage key={chatMessages[1].id} message={chatMessages[1]} />,
+            <ChatMessage key={chatMessages[2].id} message={chatMessages[2]} />,
+            <SystemMessage
+              key={systemMessages[1].id}
+              message={systemMessages[1]}
+            />,
+            <ChatMessage key={chatMessages[3].id} message={chatMessages[3]} />
+          ]}
+          composer={
+            <ChatComposer
+              defaultValue="Placeholder draft text that is not sent anywhere."
+              helperText="This composer demonstrates keyboard-safe local form behavior only."
+              label="Mock chat composer"
+              sendButtonLabel="Send mock note"
+            />
+          }
+        />
+
+        <section className="grid gap-6 lg:grid-cols-2">
+          <ChatPanel
+            title="Empty Chat Panel"
+            description="A display-only empty state for a future right-rail chat panel."
+            emptyState={{
+              description:
+                "No mock chat messages have been added to this placeholder panel.",
+              title: "No placeholder discussion yet"
+            }}
+          />
+
+          <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 shadow-paper-sm">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="text-2xl font-semibold leading-tight">
+                System Message Types
+              </h2>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Compact system notes for chat context. These are not official
+                ledger entries.
+              </p>
+            </div>
+            <SystemMessage message={systemMessages[2]} />
+            <SystemMessage message={systemMessages[3]} />
+          </section>
+        </section>
+
+        <section className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <h2 className="text-3xl font-semibold leading-tight">
+              Composer States
+            </h2>
+            <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
+              Display-only composer variants with visible helper text,
+              disabled/read-only reasons, and no persistence behavior.
+            </p>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <ChatComposer
+              defaultValue="Read-only placeholder text."
+              disabledReason="This mock conversation is read-only, so the button remains inert while still reachable by keyboard."
+              label="Read-only composer"
+              readOnly
+              sendButtonLabel="Send"
+            />
+            <ChatComposer
+              defaultValue="Placeholder message in a sending visual state."
+              helperText="Sending state is visual only; no network request is started."
+              label="Sending composer"
+              sending
+              sendButtonLabel="Send"
+            />
+            <ChatComposer
+              disabled
+              disabledReason="Chat is disabled in this placeholder state for visual review."
+              label="Disabled composer"
+              placeholder="Disabled placeholder composer"
+              sendButtonLabel="Send"
+            />
+            <ChatComposer
+              defaultValue="Placeholder message that needs recovery."
+              failed
+              helperText="Failed state keeps an explicit text explanation for accessibility."
+              label="Failed composer"
+              sendButtonLabel="Retry mock note"
+            />
+          </div>
         </section>
 
         <section className="rounded-lg border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
           Placeholder content only. No official or proprietary game content,
           private proof-of-concept data, secrets, auth wiring, Supabase schema,
-          turn persistence, commit logic, chat, realtime, map editing, pan/zoom
-          behavior, map library selection, or game creation features are
-          included.
+          message persistence, realtime behavior, Story Poll wiring, official
+          history integration, routes, turn logic, map behavior, or game state
+          features are included.
         </section>
       </div>
     </main>
