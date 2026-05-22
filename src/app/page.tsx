@@ -1,167 +1,177 @@
-import { CommunityStatePanel } from "@/components/state/community-state-panel";
-import type {
-  DiscontentCardViewModel,
-  ProjectCardViewModel,
-  ResourceCardViewModel
-} from "@/types/community-state";
+import { Timeline } from "@/components/history/timeline";
+import type { HistoryEntryCardViewModel } from "@/types/history";
 
-const projects: ProjectCardViewModel[] = [
+const officialHistoryEntries: HistoryEntryCardViewModel[] = [
   {
-    description:
-      "The community is reinforcing a narrow crossing used for daily travel.",
-    id: "repair-footbridge",
-    lastChangedLabel: "Updated in Week 03",
-    locationLabel: "South creek marker",
-    name: "Repair the footbridge",
-    recentChange: {
+    committedAtLabel: "Committed during setup",
+    committedByLabel: "Facilitator placeholder",
+    eventType: "gameStarted",
+    id: "game-started",
+    mapRevision: {
+      detail: "Baseline sketch for the shared map, shown as a mock reference.",
+      href: "#mock-map-revision-note",
+      id: "map-revision-000",
+      label: "Map Revision 000"
+    },
+    outcomeSummary:
+      "The official record begins with a baseline map and an empty community ledger.",
+    stateChange: {
+      label: "Baseline committed",
+      summary:
+        "The starting record is settled and ready for future turn outcomes.",
+      tone: "official"
+    },
+    statusLabel: "Started",
+    title: "World record opened",
+    turnLabel: "Setup",
+    weekLabel: "Week 00"
+  },
+  {
+    activePlayerLabel: "Rowan placeholder",
+    committedAtLabel: "Committed 2 days ago",
+    committedByLabel: "Rowan placeholder",
+    detailItems: [
+      {
+        label: "Official note",
+        value: "Turn outcome recorded"
+      }
+    ],
+    eventType: "turnOutcome",
+    id: "turn-outcome-week-01",
+    mapRevision: {
+      actionLabel: "View on map",
+      detail: "Settled map marks connected to this turn outcome.",
+      href: "#mock-map-revision-note",
+      id: "map-revision-001",
+      label: "Map Revision 001"
+    },
+    outcomeSummary:
+      "A committed turn outcome was added to the official ledger with its map reference.",
+    stateChange: {
+      label: "Outcome official",
+      summary:
+        "The draft text is no longer provisional and now belongs to official history.",
+      tone: "official"
+    },
+    title: "First turn outcome committed",
+    turnLabel: "Turn 01",
+    weekLabel: "Week 01"
+  },
+  {
+    activePlayerLabel: "Mira placeholder",
+    committedAtLabel: "Committed yesterday",
+    committedByLabel: "Mira placeholder",
+    eventType: "mapRevision",
+    id: "map-revision-week-02",
+    mapRevision: {
+      actionLabel: "View on map",
+      detail: "Display-only link to the committed map snapshot.",
+      href: "#mock-map-revision-note",
+      id: "map-revision-002",
+      label: "Map Revision 002"
+    },
+    outcomeSummary:
+      "A committed map snapshot was added without making this card behave like a map editor.",
+    title: "Map revision recorded",
+    turnLabel: "Turn 02",
+    weekLabel: "Week 02"
+  },
+  {
+    activePlayerLabel: "Ilan placeholder",
+    committedAtLabel: "Committed this morning",
+    committedByLabel: "Ilan placeholder",
+    detailItems: [
+      {
+        label: "Project record",
+        value: "2 weeks remaining"
+      }
+    ],
+    eventType: "projectChange",
+    id: "project-change-week-03",
+    outcomeSummary:
+      "A community project was advanced as part of the committed state record.",
+    stateChange: {
       label: "Project advanced",
+      summary:
+        "The project countdown changed in official state, not in chat or a poll.",
       tone: "official"
     },
-    remainingWeeksLabel: "2 weeks remaining",
-    startedTurnLabel: "Started Week 01",
-    status: "active"
+    title: "Project progress entered",
+    turnLabel: "Turn 03",
+    weekLabel: "Week 03"
   },
   {
-    completedTurnLabel: "Completed Week 02",
-    description:
-      "A finished record for a shared effort that has become part of the settled ledger.",
-    id: "catalog-rain-catchers",
-    lastChangedLabel: "Settled in Week 02",
-    locationLabel: "Old courtyard",
-    name: "Catalog rain catchers",
-    recentChange: {
-      label: "Completed",
-      tone: "resolved"
-    },
-    startedTurnLabel: "Started Week 01",
-    status: "completed"
-  },
-  {
-    description:
-      "A provisional note about whether the community should keep pursuing this work.",
-    id: "survey-north-ridge",
-    lastChangedLabel: "Draft saved 8 minutes ago",
-    locationLabel: "North ridge note",
-    name: "Survey the north ridge",
-    recentChange: {
-      label: "Draft change",
-      tone: "draft"
-    },
-    remainingWeeksLabel: "No official countdown yet",
-    startedTurnLabel: "Draft start: Week 04",
-    status: "draftChange"
-  },
-  {
-    description:
-      "A stopped effort preserved for context without showing it as active work.",
-    id: "signal-mast",
-    lastChangedLabel: "Marked abandoned in Week 03",
-    locationLabel: "Hill path",
-    name: "Raise a signal mast",
-    recentChange: {
-      label: "Marked abandoned",
-      tone: "neutral"
-    },
-    startedTurnLabel: "Started Week 02",
-    status: "abandoned"
-  }
-];
-
-const resources: ResourceCardViewModel[] = [
-  {
-    id: "clean-water",
-    lastChangedTurnLabel: "Changed in Week 03",
-    locationLabel: "Covered well",
-    name: "Clean water",
-    notes:
-      "The community is tracking access carefully after a recent shortage.",
-    recentChange: {
-      label: "Marked Scarcity",
+    activePlayerLabel: "Rowan placeholder",
+    committedAtLabel: "Committed 3 hours ago",
+    committedByLabel: "Rowan placeholder",
+    detailItems: [
+      {
+        label: "Resource record",
+        value: "Marked scarcity"
+      }
+    ],
+    eventType: "resourceChange",
+    id: "resource-change-week-04",
+    outcomeSummary:
+      "A resource changed status and was recorded as part of the official ledger.",
+    stateChange: {
+      label: "Resource changed",
+      summary:
+        "The resource status is committed state, separate from discussion or advisory voting.",
       tone: "attention"
     },
-    status: "scarcity"
+    title: "Resource status changed",
+    turnLabel: "Turn 04",
+    weekLabel: "Week 04"
   },
   {
-    id: "shared-tools",
-    lastChangedTurnLabel: "Confirmed in Week 02",
-    locationLabel: "Workshop shelf",
-    name: "Shared tools",
-    notes:
-      "Enough reliable tools are available for ordinary community projects.",
-    recentChange: {
-      label: "Abundance noted",
-      tone: "official"
-    },
-    status: "abundance"
-  },
-  {
-    id: "meeting-space",
-    lastChangedTurnLabel: "Reviewed in Week 01",
-    name: "Quiet meeting space",
-    notes:
-      "Tracked as a communal condition without abundance or scarcity emphasis.",
-    status: "neutral"
-  },
-  {
-    id: "forager-notes",
-    lastChangedTurnLabel: "Draft saved 4 minutes ago",
-    locationLabel: "East path marker",
-    name: "Forager notes",
-    notes:
-      "A provisional resource label that has not become official community state.",
-    recentChange: {
-      label: "Draft change",
-      tone: "draft"
-    },
-    status: "draftChange"
-  }
-];
-
-const discontent: DiscontentCardViewModel[] = [
-  {
-    count: 1,
-    holderLabel: "Rowan placeholder",
-    holderType: "playerLinked",
-    id: "rowan-discontent",
-    lastChangedLabel: "Changed in Week 03",
-    linkedTurnLabel: "Week 03",
-    reason:
-      "A quiet disagreement over how much effort should go toward the crossing.",
-    recentChange: {
+    activePlayerLabel: "Mira placeholder",
+    committedAtLabel: "Committed 42 minutes ago",
+    committedByLabel: "Mira placeholder",
+    detailItems: [
+      {
+        label: "Discontent holder",
+        value: "Community mood"
+      }
+    ],
+    eventType: "discontentChange",
+    id: "discontent-change-week-05",
+    outcomeSummary:
+      "A discontent change was committed as official state, with visible labels for the ledger.",
+    stateChange: {
       label: "+1 Discontent",
+      summary:
+        "The change is recorded as official pressure in the community state.",
       tone: "attention"
     },
-    status: "active"
+    title: "Discontent added to the ledger",
+    turnLabel: "Turn 05",
+    weekLabel: "Week 05"
   },
   {
-    count: 2,
-    holderLabel: "Community mood",
-    holderType: "communityLinked",
-    id: "community-draft-discontent",
-    lastChangedLabel: "Draft saved 11 minutes ago",
-    linkedTurnLabel: "Week 04 draft",
-    reason:
-      "A provisional note that the current turn may add pressure to the group.",
-    recentChange: {
-      label: "Draft change",
-      tone: "draft"
+    activePlayerLabel: "Ilan placeholder",
+    committedAtLabel: "Committed at archive close",
+    committedByLabel: "Facilitator placeholder",
+    eventType: "gameCompleted",
+    id: "game-completed",
+    mapRevision: {
+      detail: "Final map snapshot displayed as a read-only placeholder.",
+      href: "#mock-map-revision-note",
+      id: "map-revision-final",
+      label: "Final Map Revision"
     },
-    status: "draftChange"
-  },
-  {
-    count: 0,
-    holderLabel: "Mira placeholder",
-    holderType: "playerLinked",
-    id: "mira-resolved-discontent",
-    lastChangedLabel: "Resolved in Week 02",
-    linkedTurnLabel: "Week 02",
-    reason:
-      "A past tension has been settled and is kept here as read-only context.",
-    recentChange: {
-      label: "Resolved",
+    outcomeSummary:
+      "The completed world is closed into a read-only official timeline and final map reference.",
+    stateChange: {
+      label: "Archive ready",
+      summary:
+        "The final record is settled for future archive display without exposing private playtest content.",
       tone: "resolved"
     },
-    status: "resolved"
+    statusLabel: "Archived",
+    title: "Official timeline completed",
+    turnLabel: "Final turn",
+    weekLabel: "Final week"
   }
 ];
 
@@ -171,28 +181,58 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1K placeholder design-system demo
+            Phase 1L placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-4xl text-4xl font-semibold sm:text-5xl">
-              State Cards for Projects, Resources, and Discontent
+              Official History Ledger Primitives
             </h1>
             <p className="max-w-4xl text-lg leading-8 text-muted-foreground">
-              This temporary page only checks mock community-state card
-              primitives. It is not a real State tab, right rail, database
-              model, turn draft system, Commit & Advance flow, auth surface,
-              Supabase integration, chat surface, map feature, realtime system,
-              game event system, route, or official history implementation.
+              This temporary page only checks mock official-history card and
+              timeline primitives. It is not a real History tab, archive,
+              database model, turn draft system, Commit & Advance flow, auth
+              surface, Supabase integration, chat surface, map feature, realtime
+              system, game event system, route, or official history
+              implementation.
             </p>
           </div>
         </section>
 
-        <CommunityStatePanel
-          projects={projects}
-          resources={resources}
-          discontent={discontent}
-          title="Community State Card Gallery"
-          description="Mock data demonstrates official, provisional, resolved, abandoned, abundance, scarcity, neutral, and active discontent states with text labels instead of color-only meaning."
+        <Timeline
+          id="official-history-ledger-demo"
+          entries={officialHistoryEntries}
+          title="Official History Ledger Gallery"
+          description="Mock entries demonstrate committed turn outcomes, map revisions, project and resource changes, discontent changes, game start, and archive completion. The cards use official ledger treatment so they do not read like chat, drafts, Community Votes, or Process Votes."
+        />
+
+        <section
+          id="mock-map-revision-note"
+          tabIndex={-1}
+          className="rounded-lg border border-[var(--state-official-border)] bg-[var(--state-official-bg)] p-5 text-sm leading-6 text-[var(--state-official-text)]"
+        >
+          <div className="flex flex-col gap-2">
+            <p className="font-mono text-xs font-semibold uppercase">
+              Mock map revision reference
+            </p>
+            <h2 className="text-2xl font-semibold">Read-only map link target</h2>
+            <p>
+              This same-page target proves the ledger action can be keyboard
+              reached without adding real map behavior, map data, routes,
+              persistence, or editing tools.
+            </p>
+          </div>
+        </section>
+
+        <Timeline
+          id="official-history-empty-demo"
+          entries={[]}
+          title="Empty Official History State"
+          description="Display-only empty state for a future history panel before any committed entries exist."
+          emptyState={{
+            description:
+              "No committed history has been added yet. Drafts, chat messages, Story Polls, and Process Votes would still remain outside this ledger.",
+            title: "No official ledger entries yet"
+          }}
         />
 
         <section className="rounded-lg border border-dashed border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
