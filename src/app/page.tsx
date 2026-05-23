@@ -1,5 +1,6 @@
 import { ArchiveChatLog } from "@/components/archive/archive-chat-log";
 import { ArchiveFinalMap } from "@/components/archive/archive-final-map";
+import { ArchiveRememberedMoments } from "@/components/archive/archive-remembered-moments";
 import { ArchiveRoster } from "@/components/archive/archive-roster";
 import { ArchiveSection } from "@/components/archive/archive-section";
 import { ArchiveStateSummary } from "@/components/archive/archive-state-summary";
@@ -9,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import type {
   ArchiveChatLogViewModel,
   ArchiveFinalMapViewModel,
+  ArchiveRememberedMomentsViewModel,
   ArchiveRosterViewModel,
   ArchiveStateSummaryViewModel,
   ArchiveSummaryHeaderViewModel,
@@ -211,6 +213,60 @@ const stateSummary: ArchiveStateSummaryViewModel = {
   title: "Final State Summary"
 };
 
+const rememberedMoments: ArchiveRememberedMomentsViewModel = {
+  description:
+    "Mock remembered moments sit after official history and final state, giving the archive a small reflective layer without becoming chat, export, or summary behavior.",
+  id: "phase-1r-remembered-moments",
+  moments: [
+    {
+      authorLabel: "Mock participant A",
+      body:
+        "A placeholder decision note kept because later mock records refer back to it.",
+      category: "decision",
+      id: "remembered-decision",
+      rememberedBecause:
+        "It changed how later placeholder entries describe the community's shared direction.",
+      title: "Placeholder Decision Kept",
+      turnLabel: "Turn marker placeholder",
+      weekLabel: "Week marker placeholder"
+    },
+    {
+      authorLabel: "Mock participant B",
+      body:
+        "A settled placeholder map note became a common reference point in the final archive.",
+      category: "mapChange",
+      id: "remembered-map-change",
+      rememberedBecause:
+        "It ties the final map artifact to the official placeholder timeline.",
+      title: "Placeholder Map Memory",
+      turnLabel: "Turn marker placeholder"
+    },
+    {
+      authorLabel: "Mock participant C",
+      body:
+        "A quiet placeholder line of archived conversation remains readable without taking over the official record.",
+      category: "quote",
+      id: "remembered-quote",
+      rememberedBecause:
+        "It preserves tone while keeping chat optional and secondary.",
+      title: "Placeholder Quote",
+      weekLabel: "Week marker placeholder"
+    },
+    {
+      body:
+        "A placeholder unresolved question is kept as part of the archive's human texture.",
+      category: "unresolvedQuestion",
+      id: "remembered-question",
+      rememberedBecause:
+        "Not every archive note needs to close a thread in order to remain useful.",
+      title: "Placeholder Unresolved Question"
+    }
+  ],
+  statusLabel: "Display-only",
+  summaryLabel: "4 placeholder moments",
+  title: "Remembered Moments"
+};
+
 const roster: ArchiveRosterViewModel = {
   description:
     "Mock participants are shown with explicit role labels and turn counts. These are not connected to auth or user profiles.",
@@ -288,7 +344,7 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
         <section className="flex flex-col gap-3">
           <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-            Phase 1Q placeholder design-system demo
+            Phase 1R placeholder design-system demo
           </p>
           <div className="flex flex-col gap-3">
             <h1 className="max-w-4xl text-4xl font-semibold sm:text-5xl">
@@ -296,11 +352,11 @@ export default function Home() {
             </h1>
             <p className="max-w-4xl text-lg leading-8 text-muted-foreground">
               This temporary page only checks static final archive components:
-              summary, final map, official timeline, final state, roster, and
-              collapsed read-only chat. It is not a real archive route, export,
-              data loader, game completion flow, auth flow, Supabase
-              integration, realtime layer, map behavior, chat persistence, or
-              official event query.
+              summary, final map, official timeline, final state, remembered
+              moments, roster, and collapsed read-only chat. It is not a real
+              archive route, export, data loader, game completion flow, auth
+              flow, Supabase integration, realtime layer, map behavior, chat
+              persistence, or official event query.
             </p>
           </div>
         </section>
@@ -350,6 +406,21 @@ export default function Home() {
           title="Final State Section"
         >
           <ArchiveStateSummary state={stateSummary} />
+        </ArchiveSection>
+
+        <ArchiveSection
+          description="Remembered moments are reflective archive notes with explicit labels, separate from official history and optional chat."
+          eyebrow="Remembered moments"
+          id="archive-remembered-moments-demo"
+          statusArea={(
+            <>
+              <Badge variant="archived">Archive notes</Badge>
+              <Badge variant="outline">Mock data only</Badge>
+            </>
+          )}
+          title="Remembered Moments Section"
+        >
+          <ArchiveRememberedMoments rememberedMoments={rememberedMoments} />
         </ArchiveSection>
 
         <ArchiveSection

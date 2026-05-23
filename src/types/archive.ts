@@ -49,6 +49,37 @@ type ArchiveStateSummaryViewModel = {
   title?: string;
 };
 
+type ArchiveRememberedMomentCategory =
+  | "decision"
+  | "mapChange"
+  | "communityMemory"
+  | "unresolvedQuestion"
+  | "quote";
+
+type ArchiveRememberedMomentViewModel = {
+  authorLabel?: string;
+  body: string;
+  category?: ArchiveRememberedMomentCategory;
+  id: string;
+  rememberedBecause?: string;
+  title: string;
+  turnLabel?: string;
+  weekLabel?: string;
+};
+
+type ArchiveRememberedMomentsViewModel = {
+  description?: string;
+  emptyState?: {
+    description: string;
+    title: string;
+  };
+  id: string;
+  moments: ArchiveRememberedMomentViewModel[];
+  statusLabel?: string;
+  summaryLabel?: string;
+  title?: string;
+};
+
 type ArchiveRosterAvatarColor = "moss" | "clay" | "ochre" | "slate";
 
 type ArchiveRosterMemberViewModel = {
@@ -83,6 +114,9 @@ type ArchiveChatLogViewModel = {
 export type {
   ArchiveChatLogViewModel,
   ArchiveFinalMapViewModel,
+  ArchiveRememberedMomentCategory,
+  ArchiveRememberedMomentsViewModel,
+  ArchiveRememberedMomentViewModel,
   ArchiveRosterAvatarColor,
   ArchiveRosterMemberViewModel,
   ArchiveRosterViewModel,

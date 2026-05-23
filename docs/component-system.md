@@ -54,6 +54,28 @@ Components should use semantic tokens. Raw tokens belong in theme definitions.
 - Components should prefer semantic tokens over raw palette values.
 - Raw palette values belong in token and theme definitions, not scattered across component files.
 
+## Implemented Phase 1 Primitives
+
+Current implemented primitives include:
+
+- Token/theme foundation
+- Card and badge/state badge primitives
+- Button primitives
+- Feedback primitives
+- Input/textarea/field primitives
+- Select/checkbox/switch primitives
+- Tabs/segmented control primitives
+- Dashboard and setup card primitives
+- Story Poll and Process Vote primitives
+- Current Turn Panel primitive
+- Community State card primitives
+- Official History / Timeline primitives
+- Map Viewer shell primitives
+- Chat primitives
+- Right Rail shell primitive
+- Layout shell primitives
+- Archive section primitives, including remembered moments
+
 ## Component Library
 
 Use `shadcn/ui` as the base and theme it heavily toward Weathered Field Journal.
