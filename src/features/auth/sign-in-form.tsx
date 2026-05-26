@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { buildSignInErrorMessages } from "@/features/auth/sign-in-error-messages";
 import { buildAuthCallbackUrl } from "@/lib/auth/auth-redirects";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { validateMagicLinkEmail } from "@/lib/validation/auth.schema";
@@ -31,8 +32,8 @@ function SignInForm({ initialErrorMessage, redirectPath }: SignInFormProps) {
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [sentEmail, setSentEmail] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(
-    initialErrorMessage ?? null
+  const [submitErrorMessages, setSubmitErrorMessages] = useState<string[]>(
+    initialErrorMessage ? [initialErrorMessage] : []
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -42,13 +43,13 @@ function SignInForm({ initialErrorMessage, redirectPath }: SignInFormProps) {
 
     if (!validation.ok) {
       setFieldError(validation.message);
-      setSubmitError(null);
+      setSubmitErrorMessages([]);
       setStatus("idle");
       return;
     }
 
     setFieldError(null);
-    setSubmitError(null);
+    setSubmitErrorMessages([]);
     setStatus("submitting");
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -59,8 +60,11 @@ function SignInForm({ initialErrorMessage, redirectPath }: SignInFormProps) {
     });
 
     if (error) {
-      setSubmitError(
-        "The sign-in email could not be sent. Check the address and try again."
+      setSubmitErrorMessages(
+        buildSignInErrorMessages({
+          nodeEnv: process.env.NODE_ENV,
+          supabaseErrorMessage: error.message
+        })
       );
       setStatus("idle");
       return;
@@ -108,9 +112,9 @@ function SignInForm({ initialErrorMessage, redirectPath }: SignInFormProps) {
             </Field>
           </FieldGroup>
 
-          {submitError ? (
+          {submitErrorMessages.length > 0 ? (
             <ValidationAlert
-              messages={[submitError]}
+              messages={submitErrorMessages}
               title="Sign-in email not sent"
               variant="error"
             />
