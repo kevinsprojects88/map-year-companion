@@ -36,15 +36,15 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </Link>
           <div className="flex flex-col gap-3">
             <p className="font-mono text-sm font-semibold uppercase text-muted-foreground">
-              Phase 2B auth slice
+              Phase 2 auth sign-in
             </p>
             <h1 className="max-w-3xl text-4xl font-semibold sm:text-5xl">
               Open your private map-year workspace
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              This first auth pass only requests a secure email sign-in link or
-              one-time email flow. Profiles, dashboards, invites, and game
-              setup come later.
+              Request a secure email sign-in link or one-time email flow. After
+              sign-in, the app sends you to profile setup or the protected
+              dashboard placeholder.
             </p>
           </div>
         </section>
@@ -61,8 +61,8 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 Narrow scope
               </h2>
               <p>
-                This page does not create profiles, protect dashboard routes,
-                add database tables, or change RLS.
+                This page only sends the Magic Link / OTP request. Profile
+                saving and protected dashboard access stay on their own routes.
               </p>
               <ValidationAlert
                 messages={[
