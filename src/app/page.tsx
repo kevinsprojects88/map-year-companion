@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { ArchiveChatLog } from "@/components/archive/archive-chat-log";
 import { ArchiveFinalMap } from "@/components/archive/archive-final-map";
 import { ArchiveRememberedMoments } from "@/components/archive/archive-remembered-moments";
@@ -358,6 +360,12 @@ export default function Home() {
               flow, Supabase integration, realtime layer, map behavior, chat
               persistence, or official event query.
             </p>
+            <Link
+              className="w-fit rounded-md text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              href="/auth/sign-in"
+            >
+              Open the Phase 2B sign-in page
+            </Link>
           </div>
         </section>
 
