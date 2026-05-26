@@ -362,9 +362,9 @@ export default function Home() {
             </p>
             <Link
               className="w-fit rounded-md text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              href="/auth/sign-in"
+              href="/onboarding/profile"
             >
-              Open the Phase 2B sign-in page
+              Open the Phase 2C profile setup flow
             </Link>
           </div>
         </section>

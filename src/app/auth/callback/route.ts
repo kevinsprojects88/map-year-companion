@@ -7,6 +7,8 @@ import {
 } from "@/lib/auth/auth-redirects";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+const PROFILE_SETUP_REDIRECT_PATH = "/onboarding/profile";
+
 function redirectToSignIn(requestUrl: URL, error: AuthRedirectError, next: string) {
   return NextResponse.redirect(
     new URL(buildAuthSignInPath({ error, next }), requestUrl.origin)
@@ -15,7 +17,10 @@ function redirectToSignIn(requestUrl: URL, error: AuthRedirectError, next: strin
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
-  const next = resolveSafeAuthRedirectPath(requestUrl.searchParams.get("next"));
+  const next = resolveSafeAuthRedirectPath(
+    requestUrl.searchParams.get("next"),
+    PROFILE_SETUP_REDIRECT_PATH
+  );
   const code = requestUrl.searchParams.get("code");
   const providerError = requestUrl.searchParams.get("error");
 
