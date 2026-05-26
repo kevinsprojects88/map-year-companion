@@ -3,12 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { resolveSafeAuthRedirectPath } from "@/lib/auth/auth-redirects";
 import { getAuthenticatedUser } from "@/lib/auth/require-user";
 import { validateProfileDisplayName } from "@/lib/validation/profile.schema";
 import type { ProfileActionState } from "@/types/profile";
 
 const GENERIC_SAVE_ERROR =
   "We could not save your profile right now. Try again in a moment.";
+const DEFAULT_PROFILE_SAVE_REDIRECT_PATH = "/dashboard";
 
 function createProfileActionErrorState({
   displayName,
@@ -25,6 +27,15 @@ function createProfileActionErrorState({
     formError: formError ?? null,
     status: "error"
   };
+}
+
+function getSafeProfileSaveRedirectPath(formData: FormData) {
+  const rawNext = formData.get("next");
+
+  return resolveSafeAuthRedirectPath(
+    typeof rawNext === "string" ? rawNext : null,
+    DEFAULT_PROFILE_SAVE_REDIRECT_PATH
+  );
 }
 
 async function saveProfileAction(
@@ -89,8 +100,11 @@ async function saveProfileAction(
     });
   }
 
+  const redirectPath = getSafeProfileSaveRedirectPath(formData);
+
   revalidatePath("/onboarding/profile");
-  redirect("/");
+  revalidatePath("/dashboard");
+  redirect(redirectPath);
 }
 
 export { saveProfileAction };

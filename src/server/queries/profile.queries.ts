@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { AuthRedirectSearchParam } from "@/lib/auth/auth-redirects";
 import { requireUser } from "@/lib/auth/require-user";
 import type { Profile } from "@/types/profile";
 
@@ -9,8 +10,10 @@ type CurrentUserProfileResult = {
   userEmail: string | null;
 };
 
-async function getCurrentUserProfile(): Promise<CurrentUserProfileResult> {
-  const { supabase, user } = await requireUser("/onboarding/profile");
+async function getCurrentUserProfile(
+  redirectTo: AuthRedirectSearchParam = "/onboarding/profile"
+): Promise<CurrentUserProfileResult> {
+  const { supabase, user } = await requireUser(redirectTo);
 
   const { data, error } = await supabase
     .from("profiles")

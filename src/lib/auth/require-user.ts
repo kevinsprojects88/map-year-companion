@@ -4,7 +4,10 @@ import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { buildAuthSignInPath } from "@/lib/auth/auth-redirects";
+import {
+  buildAuthSignInPath,
+  type AuthRedirectSearchParam
+} from "@/lib/auth/auth-redirects";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -43,7 +46,7 @@ async function getAuthenticatedUser(): Promise<AuthenticatedUserContext | null> 
 }
 
 async function requireUser(
-  redirectTo = "/onboarding/profile"
+  redirectTo: AuthRedirectSearchParam = "/onboarding/profile"
 ): Promise<AuthenticatedUserContext> {
   const context = await getAuthenticatedUser();
 

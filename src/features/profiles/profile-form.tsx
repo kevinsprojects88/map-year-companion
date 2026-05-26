@@ -21,6 +21,7 @@ import type { ProfileActionState } from "@/types/profile";
 type ProfileFormProps = {
   hasProfile: boolean;
   initialDisplayName: string;
+  redirectPath: string;
   userEmail: string | null;
 };
 
@@ -46,6 +47,7 @@ function ProfileSubmitButton({ hasProfile }: { hasProfile: boolean }) {
 function ProfileForm({
   hasProfile,
   initialDisplayName,
+  redirectPath,
   userEmail
 }: ProfileFormProps) {
   const [state, formAction] = useActionState(
@@ -67,6 +69,8 @@ function ProfileForm({
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-5">
+          <input name="next" type="hidden" value={redirectPath} />
+
           <FieldGroup>
             <Field
               description="Use 1 to 80 characters. This is saved as plain text."
@@ -101,8 +105,7 @@ function ProfileForm({
         </form>
       </CardContent>
       <CardFooter>
-        Successful saves return to the placeholder home page until the dashboard
-        slice exists.
+        Successful saves continue to the protected dashboard placeholder.
       </CardFooter>
     </Card>
   );

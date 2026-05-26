@@ -360,12 +360,26 @@ export default function Home() {
               flow, Supabase integration, realtime layer, map behavior, chat
               persistence, or official event query.
             </p>
-            <Link
-              className="w-fit rounded-md text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              href="/onboarding/profile"
-            >
-              Open the Phase 2C profile setup flow
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                className="w-fit rounded-md text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                href="/dashboard"
+              >
+                Open the protected dashboard placeholder
+              </Link>
+              <Link
+                className="w-fit rounded-md text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                href="/auth/sign-in"
+              >
+                Sign in
+              </Link>
+              <Link
+                className="w-fit rounded-md text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                href="/onboarding/profile?next=%2Fdashboard"
+              >
+                Open profile setup
+              </Link>
+            </div>
           </div>
         </section>
 

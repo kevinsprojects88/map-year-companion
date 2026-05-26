@@ -3,12 +3,34 @@ import Link from "next/link";
 import { ErrorState } from "@/components/feedback/error-state";
 import { ValidationAlert } from "@/components/feedback/validation-alert";
 import { ProfileForm } from "@/features/profiles/profile-form";
+import {
+  resolveSafeAuthRedirectPath,
+  type AuthRedirectSearchParam
+} from "@/lib/auth/auth-redirects";
+import { buildProfileSetupPath } from "@/lib/auth/require-profile";
 import { getCurrentUserProfile } from "@/server/queries/profile.queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingProfilePage() {
-  const { profile, profileError, userEmail } = await getCurrentUserProfile();
+type OnboardingProfileSearchParams = {
+  next?: AuthRedirectSearchParam;
+};
+
+type OnboardingProfilePageProps = {
+  searchParams?: Promise<OnboardingProfileSearchParams>;
+};
+
+export default async function OnboardingProfilePage({
+  searchParams
+}: OnboardingProfilePageProps) {
+  const resolvedSearchParams = await searchParams;
+  const redirectPath = resolveSafeAuthRedirectPath(
+    resolvedSearchParams?.next,
+    "/dashboard"
+  );
+  const { profile, profileError, userEmail } = await getCurrentUserProfile(
+    buildProfileSetupPath(redirectPath)
+  );
 
   return (
     <main className="min-h-screen bg-background px-5 py-8 text-foreground sm:px-8 lg:py-12">
@@ -45,6 +67,7 @@ export default async function OnboardingProfilePage() {
             <ProfileForm
               hasProfile={Boolean(profile)}
               initialDisplayName={profile?.display_name ?? ""}
+              redirectPath={redirectPath}
               userEmail={userEmail}
             />
 
