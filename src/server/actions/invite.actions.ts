@@ -1,8 +1,42 @@
 "use server";
 
-import { getCreateGameInviteValues } from "@/lib/validation/invite.schema";
+import {
+  getAcceptGameInviteValues,
+  getCreateGameInviteValues
+} from "@/lib/validation/invite.schema";
+import { acceptGameInviteForCurrentUser } from "@/server/services/accept-game-invite.service";
 import { createGameInviteForCurrentUser } from "@/server/services/create-game-invite.service";
-import type { CreateGameInviteActionState } from "@/types/invite";
+import type {
+  AcceptGameInviteActionState,
+  CreateGameInviteActionState
+} from "@/types/invite";
+
+async function acceptGameInviteAction(
+  _previousState: AcceptGameInviteActionState,
+  formData: FormData
+): Promise<AcceptGameInviteActionState> {
+  const result = await acceptGameInviteForCurrentUser(formData);
+
+  if (result.ok) {
+    return {
+      fieldErrors: {},
+      formError: null,
+      gameId: result.gameId,
+      membershipId: result.membershipId,
+      status: "success",
+      values: getAcceptGameInviteValues(formData)
+    };
+  }
+
+  return {
+    fieldErrors: result.fieldErrors ?? {},
+    formError: result.formError ?? null,
+    gameId: null,
+    membershipId: null,
+    status: "error",
+    values: result.values
+  };
+}
 
 async function createGameInviteAction(
   _previousState: CreateGameInviteActionState,
@@ -33,4 +67,4 @@ async function createGameInviteAction(
   };
 }
 
-export { createGameInviteAction };
+export { acceptGameInviteAction, createGameInviteAction };

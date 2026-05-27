@@ -1,4 +1,6 @@
 import type {
+  AcceptGameInviteFieldErrors,
+  AcceptGameInviteValues,
   CreateGameInviteFieldErrors,
   CreateGameInviteValues
 } from "@/lib/validation/invite.schema";
@@ -17,4 +19,23 @@ type CreateGameInviteActionState = {
   values: CreateGameInviteValues;
 };
 
-export type { CreatedGameInvite, CreateGameInviteActionState };
+type AcceptedGameInvite = {
+  gameId: string;
+  membershipId: string;
+};
+
+type AcceptGameInviteActionState = {
+  fieldErrors: AcceptGameInviteFieldErrors;
+  formError: string | null;
+  gameId: string | null;
+  membershipId: string | null;
+  status: "idle" | "error" | "success";
+  values: AcceptGameInviteValues;
+};
+
+export type {
+  AcceptedGameInvite,
+  AcceptGameInviteActionState,
+  CreatedGameInvite,
+  CreateGameInviteActionState
+};

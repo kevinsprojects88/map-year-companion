@@ -49,8 +49,11 @@ unless a future maintenance path explicitly requires hard deletes.
 
 - Use `public.create_game_with_owner(game_name, game_description)` to create the
   initial `owner` membership when a game is created.
+- Use `public.accept_game_invite(invite_token_hash)` to accept invites by token
+  hash and create only active `player` memberships for the authenticated user.
 - Enforce owner transfer and role-change rules.
-- Accept invites by creating active player memberships.
+- Keep removed memberships removed until an explicit owner/admin reactivation
+  path is designed.
 - Prevent invalid setup states such as duplicate or missing active turn order
   before game start.
 

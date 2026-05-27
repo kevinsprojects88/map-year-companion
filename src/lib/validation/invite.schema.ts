@@ -1,7 +1,12 @@
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const INVITE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
+const INVITE_TOKEN_MIN_LENGTH = 32;
+const INVITE_TOKEN_MAX_LENGTH = 128;
 
-type CreateGameInviteInput = FormData | Record<string, unknown>;
+type InviteInput = FormData | Record<string, unknown>;
+type CreateGameInviteInput = InviteInput;
+type AcceptGameInviteInput = InviteInput;
 
 type CreateGameInviteData = {
   expiresAt: string | null;
@@ -21,6 +26,18 @@ type CreateGameInviteValues = {
   maxUses: string;
 };
 
+type AcceptGameInviteData = {
+  token: string;
+};
+
+type AcceptGameInviteFieldErrors = {
+  token?: string;
+};
+
+type AcceptGameInviteValues = {
+  token: string;
+};
+
 type CreateGameInviteValidationResult =
   | {
       data: CreateGameInviteData;
@@ -33,11 +50,23 @@ type CreateGameInviteValidationResult =
       values: CreateGameInviteValues;
     };
 
-function isFormDataInput(input: CreateGameInviteInput): input is FormData {
+type AcceptGameInviteValidationResult =
+  | {
+      data: AcceptGameInviteData;
+      ok: true;
+      values: AcceptGameInviteValues;
+    }
+  | {
+      fieldErrors: AcceptGameInviteFieldErrors;
+      ok: false;
+      values: AcceptGameInviteValues;
+    };
+
+function isFormDataInput(input: InviteInput): input is FormData {
   return typeof FormData !== "undefined" && input instanceof FormData;
 }
 
-function getInputValue(input: CreateGameInviteInput, key: string) {
+function getInputValue(input: InviteInput, key: string) {
   if (isFormDataInput(input)) {
     return input.get(key);
   }
@@ -60,6 +89,14 @@ function getCreateGameInviteValues(
     expiresAt: getTextValue(getInputValue(input, "expiresAt")),
     gameId: getTextValue(getInputValue(input, "gameId")),
     maxUses: getTextValue(getInputValue(input, "maxUses"))
+  };
+}
+
+function getAcceptGameInviteValues(
+  input: AcceptGameInviteInput
+): AcceptGameInviteValues {
+  return {
+    token: getTextValue(getInputValue(input, "token"))
   };
 }
 
@@ -118,12 +155,56 @@ function validateCreateGameInviteInput(
   };
 }
 
+function validateAcceptGameInviteInput(
+  input: AcceptGameInviteInput
+): AcceptGameInviteValidationResult {
+  const values = getAcceptGameInviteValues(input);
+  const fieldErrors: AcceptGameInviteFieldErrors = {};
+
+  if (!values.token) {
+    fieldErrors.token = "Enter a valid invite token.";
+  } else if (!INVITE_TOKEN_PATTERN.test(values.token)) {
+    fieldErrors.token = "Invite token must use only URL-safe characters.";
+  } else if (
+    values.token.length < INVITE_TOKEN_MIN_LENGTH ||
+    values.token.length > INVITE_TOKEN_MAX_LENGTH
+  ) {
+    fieldErrors.token = "Invite token is not the expected length.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      fieldErrors,
+      ok: false,
+      values
+    };
+  }
+
+  return {
+    data: {
+      token: values.token
+    },
+    ok: true,
+    values
+  };
+}
+
 export {
+  getAcceptGameInviteValues,
   getCreateGameInviteValues,
+  INVITE_TOKEN_MAX_LENGTH,
+  INVITE_TOKEN_MIN_LENGTH,
+  INVITE_TOKEN_PATTERN,
+  validateAcceptGameInviteInput,
   validateCreateGameInviteInput,
   UUID_PATTERN
 };
 export type {
+  AcceptGameInviteData,
+  AcceptGameInviteFieldErrors,
+  AcceptGameInviteInput,
+  AcceptGameInviteValidationResult,
+  AcceptGameInviteValues,
   CreateGameInviteData,
   CreateGameInviteFieldErrors,
   CreateGameInviteInput,

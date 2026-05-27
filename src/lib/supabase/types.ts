@@ -43,6 +43,15 @@ export type Database = {
       turn_status: "active" | "completed" | "reassigned" | "skipped";
     };
     Functions: {
+      accept_game_invite: {
+        Args: {
+          invite_token_hash: string;
+        };
+        Returns: {
+          game_id: string;
+          membership_id: string;
+        }[];
+      };
       create_game_with_owner: {
         Args: {
           game_description?: string | null;
