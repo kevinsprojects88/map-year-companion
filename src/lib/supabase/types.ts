@@ -42,7 +42,15 @@ export type Database = {
       system_message_type: "info" | "warning" | "process" | "state_change";
       turn_status: "active" | "completed" | "reassigned" | "skipped";
     };
-    Functions: Record<string, never>;
+    Functions: {
+      create_game_with_owner: {
+        Args: {
+          game_description?: string | null;
+          game_name: string;
+        };
+        Returns: string;
+      };
+    };
     Tables: {
       chat_messages: {
         Insert: {

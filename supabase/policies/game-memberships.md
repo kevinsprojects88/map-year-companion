@@ -29,9 +29,9 @@ Anonymous users receive no grants and have no policies.
 Authenticated owner/admin members can insert `admin` or `player` memberships for
 games they manage. Normal client inserts cannot create `owner` memberships.
 
-The initial owner membership for a newly created game is intentionally deferred
-to a future server action or RPC so game creation and membership bootstrap can
-be transactional.
+The initial owner membership for a newly created game is created through
+`public.create_game_with_owner(game_name, game_description)` so game creation and
+membership bootstrap are transactional.
 
 ### Update
 
@@ -45,9 +45,10 @@ Normal client access cannot delete memberships. The migration grants no delete
 privilege and creates no delete policy. Removal should use `status = 'removed'`
 unless a future maintenance path explicitly requires hard deletes.
 
-## Future Server Action / RPC Needs
+## Server Action / RPC Needs
 
-- Create the initial `owner` membership when a game is created.
+- Use `public.create_game_with_owner(game_name, game_description)` to create the
+  initial `owner` membership when a game is created.
 - Enforce owner transfer and role-change rules.
 - Accept invites by creating active player memberships.
 - Prevent invalid setup states such as duplicate or missing active turn order

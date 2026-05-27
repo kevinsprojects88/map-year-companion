@@ -24,4 +24,23 @@ type GameCardViewModel = {
   turnLabel?: string;
 };
 
-export type { GameCardIndicators, GameCardStatus, GameCardViewModel };
+type CreateGameActionState = {
+  fieldErrors: {
+    description?: string;
+    name?: string;
+  };
+  formError: string | null;
+  gameId: string | null;
+  status: "idle" | "error" | "success";
+  values: {
+    description: string;
+    name: string;
+  };
+};
+
+export type {
+  CreateGameActionState,
+  GameCardIndicators,
+  GameCardStatus,
+  GameCardViewModel
+};

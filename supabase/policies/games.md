@@ -30,9 +30,9 @@ Authenticated users can insert a new game shell only when `owner_id` equals
 their own `auth.uid()`. The profile row must already exist because `owner_id`
 references `public.profiles(id)`.
 
-The insert policy is intentionally not a complete product flow. Creating a game
-and creating the initial owner membership should be wrapped by a future server
-action or RPC so both rows are created together.
+The insert policy is intentionally not the direct product flow. Phase 4A adds
+`public.create_game_with_owner(game_name, game_description)` so game creation
+and initial owner membership creation happen together in one database function.
 
 ### Update
 
@@ -44,9 +44,10 @@ granted to normal authenticated clients.
 Normal client access cannot delete games. The migration grants no delete
 privilege and creates no delete policy.
 
-## Future Server Action / RPC Needs
+## Server Action / RPC Needs
 
-- Create game plus the initial `owner` membership transactionally.
+- Use `public.create_game_with_owner(game_name, game_description)` for game plus
+  initial `owner` membership bootstrap.
 - Validate lifecycle transitions such as setup to active, completed, and
   archived.
 - Validate `current_turn_id` changes now that it references `turns(id)`.
