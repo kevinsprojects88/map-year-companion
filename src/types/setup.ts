@@ -8,6 +8,8 @@ type SetupChecklistStatus =
 type SetupChecklistRequirement = "required" | "optional";
 
 type SetupChecklistItem = {
+  actionDisabledReason?: string;
+  actionHref?: string;
   actionLabel: string;
   description: string;
   requirement: SetupChecklistRequirement;
