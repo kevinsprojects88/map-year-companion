@@ -56,7 +56,6 @@ privilege and creates no delete policy.
 
 - No public or anonymous game reads are allowed.
 - Client-side permission checks are UX only; RLS is the authority.
-- `current_turn_id` has no foreign key yet because the `turns` table does not
-  exist in this slice.
+- `games.current_turn_id` is linked to `turns(id)` after the Phase 3B deck/turn/map migration.
 - The owner id is logistics metadata. Active membership roles remain the
   authorization backbone.
