@@ -17,6 +17,8 @@ type DashboardGamesQueryContext = Pick<
   "supabase" | "user"
 >;
 
+type LobbyGameAccessQueryContext = DashboardGamesQueryContext;
+
 type DashboardGameRow = Pick<
   Database["public"]["Tables"]["games"]["Row"],
   | "completed_at"
@@ -37,10 +39,35 @@ type DashboardGameMembershipRow = {
   turn_order_index: number | null;
 };
 
+type LobbyGameRow = Pick<
+  Database["public"]["Tables"]["games"]["Row"],
+  "id" | "name" | "status"
+>;
+
+type LobbyGameMembershipRow = {
+  games: LobbyGameRow | LobbyGameRow[] | null;
+  role: GameMemberRole;
+  status: GameMemberStatus;
+};
+
 type DashboardGamesResult = {
   games: DashboardGameViewModel[];
   gamesError: "games-unavailable" | null;
 };
+
+type LobbyGameAccessResult =
+  | {
+      game: LobbyGameRow;
+      membership: {
+        canCreateInvites: boolean;
+        role: GameMemberRole;
+      };
+      ok: true;
+    }
+  | {
+      error: "lobby-unavailable" | "not-member";
+      ok: false;
+    };
 
 const roleLabels: Record<GameMemberRole, string> = {
   admin: "Admin",
@@ -88,6 +115,16 @@ function formatTurnLabel(game: DashboardGameRow) {
   return game.current_season
     ? `${game.current_season}, week ${game.current_week}`
     : `Week ${game.current_week}`;
+}
+
+function getRelatedGame(
+  game: LobbyGameRow | LobbyGameRow[] | null
+): LobbyGameRow | null {
+  return Array.isArray(game) ? (game[0] ?? null) : game;
+}
+
+function canRoleCreateInvites(role: GameMemberRole) {
+  return role === "owner" || role === "admin";
 }
 
 function getPrimaryActionLabel(status: GameStatus) {
@@ -175,5 +212,61 @@ async function getDashboardGamesForCurrentUser({
   };
 }
 
-export { getDashboardGamesForCurrentUser };
-export type { DashboardGamesResult };
+async function getLobbyGameAccessForCurrentUser(
+  { supabase, user }: LobbyGameAccessQueryContext,
+  gameId: string
+): Promise<LobbyGameAccessResult> {
+  const { data, error } = await supabase
+    .from("game_memberships")
+    .select(
+      `
+        role,
+        status,
+        games!inner (
+          id,
+          name,
+          status
+        )
+      `
+    )
+    .eq("game_id", gameId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error) {
+    return {
+      error: "lobby-unavailable",
+      ok: false
+    };
+  }
+
+  if (!data) {
+    return {
+      error: "not-member",
+      ok: false
+    };
+  }
+
+  const membership = data as LobbyGameMembershipRow;
+  const game = getRelatedGame(membership.games);
+
+  if (!game || membership.status !== "active") {
+    return {
+      error: "not-member",
+      ok: false
+    };
+  }
+
+  return {
+    game,
+    membership: {
+      canCreateInvites: canRoleCreateInvites(membership.role),
+      role: membership.role
+    },
+    ok: true
+  };
+}
+
+export { getDashboardGamesForCurrentUser, getLobbyGameAccessForCurrentUser };
+export type { DashboardGamesResult, LobbyGameAccessResult };

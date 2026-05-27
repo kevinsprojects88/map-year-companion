@@ -43,9 +43,7 @@ async function createGameInviteAction(
       fieldErrors: {},
       formError: null,
       invite: {
-        inviteId: result.inviteId,
-        invitePath: result.invitePath,
-        token: result.token
+        invitePath: result.invitePath
       },
       status: "success",
       values: getCreateGameInviteValues(formData)

@@ -11,10 +11,12 @@ type CreatedGameInvite = {
   token: string;
 };
 
+type CreatedGameInviteActionResult = Pick<CreatedGameInvite, "invitePath">;
+
 type CreateGameInviteActionState = {
   fieldErrors: CreateGameInviteFieldErrors;
   formError: string | null;
-  invite: CreatedGameInvite | null;
+  invite: CreatedGameInviteActionResult | null;
   status: "idle" | "error" | "success";
   values: CreateGameInviteValues;
 };
@@ -37,5 +39,6 @@ export type {
   AcceptedGameInvite,
   AcceptGameInviteActionState,
   CreatedGameInvite,
+  CreatedGameInviteActionResult,
   CreateGameInviteActionState
 };
