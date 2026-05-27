@@ -15,13 +15,26 @@ type GameCardIndicators = {
 
 type GameCardViewModel = {
   activePlayerLabel?: string;
+  id: string;
   indicators?: GameCardIndicators;
   lastUpdatedLabel: string;
+  membershipRoleLabel?: string;
   name: string;
-  playerCountLabel: string;
+  playerCountLabel?: string;
+  primaryActionHref?: string;
   primaryActionLabel: string;
   status: GameCardStatus;
   turnLabel?: string;
+};
+
+type DashboardGameGroupKey =
+  | "yourTurn"
+  | "active"
+  | "waitingToStart"
+  | "completed";
+
+type DashboardGameViewModel = GameCardViewModel & {
+  group: DashboardGameGroupKey;
 };
 
 type CreateGameActionState = {
@@ -40,6 +53,8 @@ type CreateGameActionState = {
 
 export type {
   CreateGameActionState,
+  DashboardGameGroupKey,
+  DashboardGameViewModel,
   GameCardIndicators,
   GameCardStatus,
   GameCardViewModel

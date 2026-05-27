@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
+import Link from "next/link";
 
 import {
   Card,
@@ -81,6 +82,26 @@ const gameStatusDisplay: Record<GameCardStatus, GameStatusDisplay> = {
   }
 };
 
+const actionBaseClasses =
+  "inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-sm font-semibold leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+const actionVariantClasses: Record<ButtonVariant, string> = {
+  destructive:
+    "border-[var(--state-error-border)] bg-[var(--state-error-accent)] text-[var(--text-inverse)] hover:bg-[var(--error-700)]",
+  draft:
+    "border-dashed border-[var(--state-draft-border)] bg-[var(--state-draft-surface)] text-[var(--state-draft-text)] hover:bg-[var(--state-draft-bg)]",
+  ghost:
+    "border-transparent bg-transparent text-foreground hover:border-border hover:bg-muted",
+  official:
+    "border-[var(--state-official-border)] bg-[var(--state-official-accent)] text-[var(--text-inverse)] hover:bg-[var(--moss-800)]",
+  primary:
+    "border-primary bg-primary text-primary-foreground hover:bg-[var(--moss-800)]",
+  process:
+    "border-[var(--state-process-border)] bg-[var(--state-process-surface)] text-[var(--state-process-text)] hover:bg-[var(--state-process-bg)]",
+  secondary:
+    "border-border bg-secondary text-secondary-foreground hover:border-border-strong hover:bg-[var(--paper-200)]"
+};
+
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
@@ -115,12 +136,19 @@ function GameCard({
 }: GameCardProps) {
   const status = gameStatusDisplay[game.status];
   const indicators = getGameIndicators(game);
+  const primaryActionLabel =
+    primaryActionAriaLabel ?? `${game.primaryActionLabel}: ${game.name}`;
   const detailItems = [
     game.activePlayerLabel
       ? { label: "Player", value: game.activePlayerLabel }
       : null,
     game.turnLabel ? { label: "Marker", value: game.turnLabel } : null,
-    { label: "Players", value: game.playerCountLabel },
+    game.membershipRoleLabel
+      ? { label: "Role", value: game.membershipRoleLabel }
+      : null,
+    game.playerCountLabel
+      ? { label: "Players", value: game.playerCountLabel }
+      : null,
     { label: "Updated", value: game.lastUpdatedLabel }
   ].filter(
     (item): item is { label: string; value: string } => item !== null
@@ -150,14 +178,25 @@ function GameCard({
           </CardDescription>
         </div>
         <CardAction>
-          <Button
-            aria-label={
-              primaryActionAriaLabel ?? `${game.primaryActionLabel}: ${game.name}`
-            }
-            variant={status.actionVariant}
-          >
-            {game.primaryActionLabel}
-          </Button>
+          {game.primaryActionHref ? (
+            <Link
+              aria-label={primaryActionLabel}
+              className={classes(
+                actionBaseClasses,
+                actionVariantClasses[status.actionVariant]
+              )}
+              href={game.primaryActionHref}
+            >
+              {game.primaryActionLabel}
+            </Link>
+          ) : (
+            <Button
+              aria-label={primaryActionLabel}
+              variant={status.actionVariant}
+            >
+              {game.primaryActionLabel}
+            </Button>
+          )}
         </CardAction>
       </CardHeader>
 
