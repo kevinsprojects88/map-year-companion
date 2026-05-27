@@ -6,6 +6,20 @@ type LobbyMembershipRole = Database["public"]["Enums"]["game_member_role"];
 type LobbyMembershipStatus =
   Database["public"]["Enums"]["game_member_status"];
 
+type LobbyRosterMemberViewModel = {
+  displayName: string;
+  isCurrentUser: boolean;
+  joinedLabel: string;
+  membershipId: string;
+  profileId: string;
+  role: LobbyMembershipRole;
+  roleLabel: string;
+  status: LobbyMembershipStatus;
+  statusLabel: string;
+  turnOrderIndex: number | null;
+  turnOrderLabel: string;
+};
+
 type LobbyStatusViewModel = {
   game: {
     createdLabel: string;
@@ -25,6 +39,12 @@ type LobbyStatusViewModel = {
   };
   memberCount: number;
   memberCountLabel: string;
+  roster: {
+    memberCount: number;
+    memberCountLabel: string;
+    members: LobbyRosterMemberViewModel[];
+    readOnlyLabel: string;
+  };
   setupChecklistItems: SetupChecklistItem[];
 };
 
@@ -32,5 +52,6 @@ export type {
   LobbyGameStatus,
   LobbyMembershipRole,
   LobbyMembershipStatus,
+  LobbyRosterMemberViewModel,
   LobbyStatusViewModel
 };

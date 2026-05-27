@@ -2,7 +2,10 @@ import "server-only";
 
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
 import type { Database } from "@/lib/supabase/types";
-import type { LobbyStatusViewModel } from "@/types/lobby";
+import type {
+  LobbyRosterMemberViewModel,
+  LobbyStatusViewModel
+} from "@/types/lobby";
 import type { SetupChecklistItem } from "@/types/setup";
 
 type GameStatus = Database["public"]["Enums"]["game_status"];
@@ -23,6 +26,18 @@ type LobbyMembershipRow = {
   games: LobbyGameRow | LobbyGameRow[] | null;
   role: GameMemberRole;
   status: GameMemberStatus;
+};
+
+type LobbyProfileRow = Pick<
+  Database["public"]["Tables"]["profiles"]["Row"],
+  "display_name" | "id"
+>;
+
+type LobbyRosterMembershipRow = Pick<
+  Database["public"]["Tables"]["game_memberships"]["Row"],
+  "id" | "joined_at" | "role" | "status" | "turn_order_index" | "user_id"
+> & {
+  profiles: LobbyProfileRow | LobbyProfileRow[] | null;
 };
 
 type LobbyStatusQueryResult =
@@ -59,11 +74,20 @@ function getRelatedGame(
   return Array.isArray(game) ? (game[0] ?? null) : game;
 }
 
+function getRelatedProfile(
+  profile: LobbyProfileRow | LobbyProfileRow[] | null
+): LobbyProfileRow | null {
+  return Array.isArray(profile) ? (profile[0] ?? null) : profile;
+}
+
 function canRoleCreateInvites(role: GameMemberRole) {
   return role === "owner" || role === "admin";
 }
 
-function formatDateLabel(prefix: "Created" | "Updated", value: string) {
+function formatDateLabel(
+  prefix: "Created" | "Joined" | "Updated",
+  value: string
+) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
@@ -75,8 +99,60 @@ function formatDateLabel(prefix: "Created" | "Updated", value: string) {
   }).format(date)}`;
 }
 
+function formatJoinedLabel(value: string) {
+  return formatDateLabel("Joined", value);
+}
+
 function getMemberCountLabel(memberCount: number) {
   return `${memberCount} active ${memberCount === 1 ? "member" : "members"}`;
+}
+
+function getTurnOrderLabel(turnOrderIndex: number | null) {
+  return turnOrderIndex === null
+    ? "Turn order: not set"
+    : `Turn order: ${turnOrderIndex + 1}`;
+}
+
+function sortRosterRows(
+  first: LobbyRosterMembershipRow,
+  second: LobbyRosterMembershipRow
+) {
+  if (first.turn_order_index === second.turn_order_index) {
+    return first.joined_at.localeCompare(second.joined_at);
+  }
+
+  if (first.turn_order_index === null) {
+    return 1;
+  }
+
+  if (second.turn_order_index === null) {
+    return -1;
+  }
+
+  return first.turn_order_index - second.turn_order_index;
+}
+
+function buildRosterMemberViewModel(
+  membership: LobbyRosterMembershipRow,
+  currentUserId: string
+): LobbyRosterMemberViewModel {
+  const profile = getRelatedProfile(membership.profiles);
+  const displayName =
+    profile?.display_name?.trim() || "Member profile unavailable";
+
+  return {
+    displayName,
+    isCurrentUser: membership.user_id === currentUserId,
+    joinedLabel: formatJoinedLabel(membership.joined_at),
+    membershipId: membership.id,
+    profileId: profile?.id ?? membership.user_id,
+    role: membership.role,
+    roleLabel: memberRoleLabels[membership.role],
+    status: membership.status,
+    statusLabel: memberStatusLabels[membership.status],
+    turnOrderIndex: membership.turn_order_index,
+    turnOrderLabel: getTurnOrderLabel(membership.turn_order_index)
+  };
 }
 
 function buildLobbySetupChecklistItems({
@@ -112,7 +188,7 @@ function buildLobbySetupChecklistItems({
         "Player list management is deferred; this card only reports the current active member count.",
       actionLabel: "Status only",
       description:
-        "The lobby can see how many active members are already in the game.",
+        "The lobby shows the active member roster and current setup count.",
       requirement: "required",
       status: hasMultipleMembers ? "complete" : "warning",
       title: "Players invited",
@@ -127,12 +203,12 @@ function buildLobbySetupChecklistItems({
       actionDisabledReason: "Turn order editing comes in a later Phase 5 slice.",
       actionLabel: "Coming later",
       description:
-        "Turn order will be structured here later without changing roles in this slice.",
+        "Current turn order is visible in the read-only roster; editing comes later.",
       requirement: "required",
       status: "incomplete",
       title: "Turn order",
       validationMessages: [
-        "No turn order editing or player management is available in Phase 5A."
+        "No turn order editing or player management is available in Phase 5B."
       ]
     },
     {
@@ -189,14 +265,16 @@ function buildLobbySetupChecklistItems({
 
 function buildLobbyStatusViewModel({
   game,
-  memberCount,
-  membership
+  membership,
+  rosterMembers
 }: {
   game: LobbyGameRow;
-  memberCount: number;
   membership: Pick<LobbyMembershipRow, "role" | "status">;
+  rosterMembers: LobbyRosterMemberViewModel[];
 }): LobbyStatusViewModel {
   const isOwnerAdmin = canRoleCreateInvites(membership.role);
+  const memberCount = rosterMembers.length;
+  const memberCountLabel = getMemberCountLabel(memberCount);
 
   return {
     game: {
@@ -208,7 +286,7 @@ function buildLobbyStatusViewModel({
       updatedLabel: formatDateLabel("Updated", game.updated_at)
     },
     memberCount,
-    memberCountLabel: getMemberCountLabel(memberCount),
+    memberCountLabel,
     membership: {
       canCreateInvites: isOwnerAdmin,
       isOwnerAdmin,
@@ -216,6 +294,13 @@ function buildLobbyStatusViewModel({
       roleLabel: memberRoleLabels[membership.role],
       status: membership.status,
       statusLabel: memberStatusLabels[membership.status]
+    },
+    roster: {
+      memberCount,
+      memberCountLabel,
+      members: rosterMembers,
+      readOnlyLabel:
+        "Turn order editing, player removal, and role changes come later."
     },
     setupChecklistItems: buildLobbySetupChecklistItems({
       isOwnerAdmin,
@@ -281,13 +366,28 @@ async function getLobbyStatusForCurrentUser(
     };
   }
 
-  const { count, error: countError } = await supabase
+  const { data: rosterData, error: rosterError } = await supabase
     .from("game_memberships")
-    .select("id", { count: "exact", head: true })
+    .select(
+      `
+        id,
+        user_id,
+        role,
+        status,
+        turn_order_index,
+        joined_at,
+        profiles!game_memberships_user_id_fkey (
+          id,
+          display_name
+        )
+      `
+    )
     .eq("game_id", gameId)
-    .eq("status", "active");
+    .eq("status", "active")
+    .order("turn_order_index", { ascending: true, nullsFirst: false })
+    .order("joined_at", { ascending: true });
 
-  if (countError) {
+  if (rosterError) {
     return {
       error: "lobby-unavailable",
       ok: false
@@ -297,14 +397,19 @@ async function getLobbyStatusForCurrentUser(
   return {
     lobby: buildLobbyStatusViewModel({
       game,
-      memberCount: count ?? 0,
-      membership
+      membership,
+      rosterMembers: [...((rosterData ?? []) as LobbyRosterMembershipRow[])]
+        .sort(sortRosterRows)
+        .map((rosterMembership) =>
+          buildRosterMemberViewModel(rosterMembership, user.id)
+        )
     }),
     ok: true
   };
 }
 
 export {
+  buildRosterMemberViewModel,
   buildLobbySetupChecklistItems,
   buildLobbyStatusViewModel,
   getLobbyStatusForCurrentUser

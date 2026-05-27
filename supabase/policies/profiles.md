@@ -11,19 +11,28 @@ proof-of-concept content, official game content, or seed data.
 
 ## RLS Intent
 
-Profiles are private-by-default during this foundation slice. A signed-in user
-can read, create, and update only their own profile row. Anonymous users receive
-no table grants and have no policies.
+Profiles are private-by-default outside shared game membership. A signed-in user
+can read, create, and update their own profile row. Active members of the same
+game can read basic profile rows for other active members of that game so the
+lobby can show display names in the member roster. Anonymous users receive no
+table grants and have no policies.
 
 Client-side checks are not authoritative. The policies enforce ownership with
-`auth.uid()` at the database layer.
+`auth.uid()` and active same-game membership at the database layer.
 
 ## Policy Behavior
 
 ### Select
 
-Authenticated users can select a profile only when `profiles.id = auth.uid()`.
-There is no broad public profile directory or cross-user read policy.
+Authenticated users can select:
+
+- their own profile row
+- active same-game member profile rows through
+  `private.can_read_game_member_profile(profiles.id)`
+
+There is no broad public profile directory. Cross-user reads require both the
+viewer and target profile to have active memberships in at least one shared
+game.
 
 ### Insert
 
@@ -42,14 +51,13 @@ Normal client access cannot delete profiles. The migration grants only
 `select`, `insert`, and `update` to the `authenticated` role, limits client
 writes to profile-owned fields, and creates no delete policy.
 
-## Why Public Reads Are Deferred
+## Why Public Reads Stay Limited
 
-Public profile reads are not enabled yet because game membership does not exist
-in the database. Exposing profiles broadly now would leak user names before the
-app has a membership-based access model.
+Public profile reads are not enabled. The shared-game select policy exists only
+for member rosters and other member-scoped attribution surfaces.
 
 ## Future Note
 
-Although `game_memberships` now exists, co-member profile reads remain deferred.
-If that policy is added later, it should stay limited to the specific game
-relationship and should not become a broad public profile directory.
+If more profile fields are introduced later, review whether they should remain
+visible through the shared-game policy before granting them to authenticated
+clients.

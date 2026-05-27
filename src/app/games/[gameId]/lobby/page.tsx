@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionAlert } from "@/components/feedback/permission-alert";
+import { LobbyRoster } from "@/components/lobby/lobby-roster";
 import { LobbySetupStatus } from "@/components/lobby/lobby-setup-status";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -71,7 +72,7 @@ export default async function GameLobbyPage({
           </Link>
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Phase 5A</Badge>
+              <Badge variant="secondary">Phase 5B</Badge>
               <Badge variant="outline">Member-scoped lobby</Badge>
               <Badge variant="waiting">{lobby.game.statusLabel}</Badge>
             </div>
@@ -79,9 +80,10 @@ export default async function GameLobbyPage({
               {lobby.game.name}
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              This private lobby now shows real setup status for active
-              members. Setup is not complete yet, and deck, map, turn, notes,
-              and start-game actions remain disabled for later slices.
+              This private lobby now shows real setup status and read-only turn
+              order for active members. Setup is not complete yet, and deck,
+              map, turn editing, notes, and start-game actions remain disabled
+              for later slices.
             </p>
           </div>
         </section>
@@ -152,6 +154,8 @@ export default async function GameLobbyPage({
               </Card>
             </section>
 
+            <LobbyRoster roster={lobby.roster} />
+
             <LobbySetupStatus items={lobby.setupChecklistItems} />
 
             {lobby.membership.canCreateInvites ? (
@@ -173,9 +177,9 @@ export default async function GameLobbyPage({
               </h2>
               <p>
                 The lobby reads the game, your active membership, and active
-                member count. It does not read invite lists, deck records, map
-                records, notes, turn setup records, or private proof-of-concept
-                content.
+                member roster. It does not read invite lists, deck records, map
+                records, notes, editable turn setup records, or private
+                proof-of-concept content.
               </p>
             </div>
           </aside>
