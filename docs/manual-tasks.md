@@ -13,7 +13,7 @@
 | Install and configure Supabase CLI for repeatable local/hosted verification. | Enables migration history, RLS/grant checks, advisors, and generated types without relying only on SQL Editor. | Future |
 | Verify the current account has a `profiles` row. | Confirms profile setup can read/write the signed-in user's profile. | Complete |
 | Create a dedicated no-profile test account. | Needed to manually verify the signed-in no-profile redirect path without disturbing Kevin's profile. | Future |
-| Test invite flow with second account. | Validates private async flow. | Future |
+| Test invite flow with second account. | Kevin verified `First Smoke Game` (`c54887e2-6ee1-46a2-9861-7a5894d697db`) with Kevin as owner/active turn order `0`, `kevinrallen0` as player/active turn order `1`, and the latest invite at `used_count = 1`. | Complete |
 | Approve map library choice after tiny map spike. | Map implementation is intentionally deferred. | Future |
 | Review Codex decision-log suggestions before adding them. | Keeps canonical decisions controlled. | Ongoing |
 | Run Daily Review after substantial coding sessions. | Catches drift. | Ongoing |

@@ -165,6 +165,58 @@ order by column_name;
 
 Expected result: `token_hash` only.
 
+## Phase 4H Invite Flow Membership Check
+
+Use this to verify the accepted invite created the expected active membership
+rows for the smoke-test game.
+
+```sql
+select
+  profiles.display_name,
+  profiles.id as user_id,
+  memberships.role,
+  memberships.status,
+  memberships.turn_order_index,
+  memberships.joined_at
+from public.game_memberships memberships
+join public.profiles profiles
+  on profiles.id = memberships.user_id
+where memberships.game_id = 'c54887e2-6ee1-46a2-9861-7a5894d697db'
+order by memberships.turn_order_index nulls last, profiles.display_name;
+```
+
+Expected result for the Phase 4G manual verification:
+
+- Kevin is `owner` / `active` / `turn_order_index = 0`.
+- `kevinrallen0` is `player` / `active` / `turn_order_index = 1`.
+
+## Phase 4H Invite Usage Check
+
+Use this to verify the latest invite for the smoke-test game was consumed once
+and remains unlimited, not revoked, and unexpired.
+
+```sql
+select
+  id,
+  game_id,
+  used_count,
+  max_uses,
+  revoked_at,
+  expires_at,
+  created_at
+from public.game_invites
+where game_id = 'c54887e2-6ee1-46a2-9861-7a5894d697db'
+order by created_at desc
+limit 1;
+```
+
+Expected result for the Phase 4G manual verification:
+
+- `used_count = 1`
+- `max_uses = null`
+- `revoked_at = null`
+- `expires_at = null`
+
 ## No Authenticated Delete Grants
 
 ```sql
