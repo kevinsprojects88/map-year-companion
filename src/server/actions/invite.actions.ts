@@ -1,9 +1,9 @@
 "use server";
 
-import {
-  getAcceptGameInviteValues,
-  getCreateGameInviteValues
-} from "@/lib/validation/invite.schema";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { getCreateGameInviteValues } from "@/lib/validation/invite.schema";
 import { acceptGameInviteForCurrentUser } from "@/server/services/accept-game-invite.service";
 import { createGameInviteForCurrentUser } from "@/server/services/create-game-invite.service";
 import type {
@@ -18,14 +18,8 @@ async function acceptGameInviteAction(
   const result = await acceptGameInviteForCurrentUser(formData);
 
   if (result.ok) {
-    return {
-      fieldErrors: {},
-      formError: null,
-      gameId: result.gameId,
-      membershipId: result.membershipId,
-      status: "success",
-      values: getAcceptGameInviteValues(formData)
-    };
+    revalidatePath("/dashboard");
+    redirect(`/games/${result.gameId}/lobby`);
   }
 
   return {
