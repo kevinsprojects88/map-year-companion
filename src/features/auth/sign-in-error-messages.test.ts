@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  buildSignInErrorMessages,
-  friendlySignInErrorMessage
-} from "./sign-in-error-messages";
+const { buildSignInErrorMessages, friendlySignInErrorMessage } = (await import(
+  "./sign-in-error-messages" + ".ts"
+)) as typeof import("./sign-in-error-messages");
 
 test("returns only the friendly sign-in error outside development", () => {
   const messages = buildSignInErrorMessages({
