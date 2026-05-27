@@ -1,18 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
 import { createGameForCurrentUser } from "@/server/services/create-game.service";
 import type { CreateGameActionState } from "@/types/game";
-
-const initialCreateGameActionState: CreateGameActionState = {
-  fieldErrors: {},
-  formError: null,
-  gameId: null,
-  status: "idle",
-  values: {
-    description: "",
-    name: ""
-  }
-};
 
 async function createGameAction(
   _previousState: CreateGameActionState,
@@ -21,11 +13,8 @@ async function createGameAction(
   const result = await createGameForCurrentUser(formData);
 
   if (result.ok) {
-    return {
-      ...initialCreateGameActionState,
-      gameId: result.gameId,
-      status: "success"
-    };
+    revalidatePath("/dashboard");
+    redirect(`/games/${result.gameId}/lobby`);
   }
 
   return {
@@ -37,4 +26,4 @@ async function createGameAction(
   };
 }
 
-export { createGameAction, initialCreateGameActionState };
+export { createGameAction };
