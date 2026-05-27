@@ -10,15 +10,82 @@ export type Database = {
   public: {
     CompositeTypes: Record<string, never>;
     Enums: {
+      chat_message_type: "player" | "system";
       deck_source_type: "placeholder" | "manual" | "json_import" | "private_poc";
       deck_status: "draft" | "valid" | "locked";
       game_member_role: "owner" | "admin" | "player";
       game_member_status: "active" | "removed";
       game_status: "setup" | "active" | "completed" | "archived";
+      process_vote_response: "yes" | "no" | "abstain";
+      process_vote_status: "open" | "passed" | "failed" | "cancelled";
+      process_vote_type: "reassign_stuck_turn";
+      story_poll_status: "open" | "closed";
+      system_message_type: "info" | "warning" | "process" | "state_change";
       turn_status: "active" | "completed" | "reassigned" | "skipped";
     };
     Functions: Record<string, never>;
     Tables: {
+      chat_messages: {
+        Insert: {
+          author_id: string;
+          body: string;
+          created_at?: string;
+          edited_at?: string | null;
+          game_id: string;
+          id?: string;
+          linked_object_label?: string | null;
+          message_type?: Database["public"]["Enums"]["chat_message_type"];
+          system_type?: Database["public"]["Enums"]["system_message_type"] | null;
+          turn_id?: string | null;
+        };
+        Relationships: [
+          {
+            columns: ["author_id"];
+            foreignKeyName: "chat_messages_author_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+          {
+            columns: ["game_id"];
+            foreignKeyName: "chat_messages_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          },
+          {
+            columns: ["turn_id"];
+            foreignKeyName: "chat_messages_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          }
+        ];
+        Row: {
+          author_id: string;
+          body: string;
+          created_at: string;
+          edited_at: string | null;
+          game_id: string;
+          id: string;
+          linked_object_label: string | null;
+          message_type: Database["public"]["Enums"]["chat_message_type"];
+          system_type: Database["public"]["Enums"]["system_message_type"] | null;
+          turn_id: string | null;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+          edited_at?: string | null;
+          game_id?: string;
+          id?: string;
+          linked_object_label?: string | null;
+          message_type?: Database["public"]["Enums"]["chat_message_type"];
+          system_type?: Database["public"]["Enums"]["system_message_type"] | null;
+          turn_id?: string | null;
+        };
+      };
       deck_cards: {
         Insert: {
           card_key: string;
@@ -390,6 +457,116 @@ export type Database = {
           turn_id?: string | null;
         };
       };
+      process_vote_responses: {
+        Insert: {
+          created_at?: string;
+          id?: string;
+          process_vote_id: string;
+          response: Database["public"]["Enums"]["process_vote_response"];
+          updated_at?: string;
+          voter_id: string;
+        };
+        Relationships: [
+          {
+            columns: ["process_vote_id"];
+            foreignKeyName: "process_vote_responses_process_vote_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "process_votes";
+          },
+          {
+            columns: ["voter_id"];
+            foreignKeyName: "process_vote_responses_voter_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          }
+        ];
+        Row: {
+          created_at: string;
+          id: string;
+          process_vote_id: string;
+          response: Database["public"]["Enums"]["process_vote_response"];
+          updated_at: string;
+          voter_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          process_vote_id?: string;
+          response?: Database["public"]["Enums"]["process_vote_response"];
+          updated_at?: string;
+          voter_id?: string;
+        };
+      };
+      process_votes: {
+        Insert: {
+          created_at?: string;
+          created_by: string;
+          game_id: string;
+          id?: string;
+          reason?: string | null;
+          resolved_at?: string | null;
+          status?: Database["public"]["Enums"]["process_vote_status"];
+          target_player_id?: string | null;
+          turn_id: string;
+          vote_type?: Database["public"]["Enums"]["process_vote_type"];
+        };
+        Relationships: [
+          {
+            columns: ["created_by"];
+            foreignKeyName: "process_votes_created_by_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+          {
+            columns: ["game_id"];
+            foreignKeyName: "process_votes_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          },
+          {
+            columns: ["target_player_id"];
+            foreignKeyName: "process_votes_target_player_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+          {
+            columns: ["turn_id"];
+            foreignKeyName: "process_votes_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          }
+        ];
+        Row: {
+          created_at: string;
+          created_by: string;
+          game_id: string;
+          id: string;
+          reason: string | null;
+          resolved_at: string | null;
+          status: Database["public"]["Enums"]["process_vote_status"];
+          target_player_id: string | null;
+          turn_id: string;
+          vote_type: Database["public"]["Enums"]["process_vote_type"];
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string;
+          game_id?: string;
+          id?: string;
+          reason?: string | null;
+          resolved_at?: string | null;
+          status?: Database["public"]["Enums"]["process_vote_status"];
+          target_player_id?: string | null;
+          turn_id?: string;
+          vote_type?: Database["public"]["Enums"]["process_vote_type"];
+        };
+      };
       profiles: {
         Insert: {
           avatar_color?: string | null;
@@ -412,6 +589,149 @@ export type Database = {
           display_name?: string;
           id?: string;
           updated_at?: string;
+        };
+      };
+      story_poll_options: {
+        Insert: {
+          id?: string;
+          label: string;
+          poll_id: string;
+          sort_order: number;
+        };
+        Relationships: [
+          {
+            columns: ["poll_id"];
+            foreignKeyName: "story_poll_options_poll_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "story_polls";
+          }
+        ];
+        Row: {
+          id: string;
+          label: string;
+          poll_id: string;
+          sort_order: number;
+        };
+        Update: {
+          id?: string;
+          label?: string;
+          poll_id?: string;
+          sort_order?: number;
+        };
+      };
+      story_poll_votes: {
+        Insert: {
+          created_at?: string;
+          id?: string;
+          option_id: string;
+          poll_id: string;
+          updated_at?: string;
+          voter_id: string;
+        };
+        Relationships: [
+          {
+            columns: ["option_id"];
+            foreignKeyName: "story_poll_votes_option_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "story_poll_options";
+          },
+          {
+            columns: ["poll_id"];
+            foreignKeyName: "story_poll_votes_poll_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "story_polls";
+          },
+          {
+            columns: ["poll_id", "option_id"];
+            foreignKeyName: "story_poll_votes_poll_option_fkey";
+            isOneToOne: false;
+            referencedColumns: ["poll_id", "id"];
+            referencedRelation: "story_poll_options";
+          },
+          {
+            columns: ["voter_id"];
+            foreignKeyName: "story_poll_votes_voter_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          }
+        ];
+        Row: {
+          created_at: string;
+          id: string;
+          option_id: string;
+          poll_id: string;
+          updated_at: string;
+          voter_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          option_id?: string;
+          poll_id?: string;
+          updated_at?: string;
+          voter_id?: string;
+        };
+      };
+      story_polls: {
+        Insert: {
+          closed_at?: string | null;
+          created_at?: string;
+          created_by: string;
+          description?: string | null;
+          game_id: string;
+          id?: string;
+          question: string;
+          status?: Database["public"]["Enums"]["story_poll_status"];
+          turn_id: string;
+        };
+        Relationships: [
+          {
+            columns: ["created_by"];
+            foreignKeyName: "story_polls_created_by_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+          {
+            columns: ["game_id"];
+            foreignKeyName: "story_polls_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          },
+          {
+            columns: ["turn_id"];
+            foreignKeyName: "story_polls_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          }
+        ];
+        Row: {
+          closed_at: string | null;
+          created_at: string;
+          created_by: string;
+          description: string | null;
+          game_id: string;
+          id: string;
+          question: string;
+          status: Database["public"]["Enums"]["story_poll_status"];
+          turn_id: string;
+        };
+        Update: {
+          closed_at?: string | null;
+          created_at?: string;
+          created_by?: string;
+          description?: string | null;
+          game_id?: string;
+          id?: string;
+          question?: string;
+          status?: Database["public"]["Enums"]["story_poll_status"];
+          turn_id?: string;
         };
       };
       turn_drafts: {
