@@ -50,6 +50,6 @@ app has a membership-based access model.
 
 ## Future Note
 
-Once `game_memberships` exists, profiles may later be readable by co-members of
-the same game. That future policy should be added with the membership table and
-should stay limited to the specific game relationship.
+Although `game_memberships` now exists, co-member profile reads remain deferred.
+If that policy is added later, it should stay limited to the specific game
+relationship and should not become a broad public profile directory.

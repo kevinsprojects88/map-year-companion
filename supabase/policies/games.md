@@ -3,8 +3,7 @@
 ## Table Purpose
 
 `public.games` stores the private game container. It owns setup metadata,
-current-turn pointers that will be connected later, lifecycle status, and
-timestamps.
+the current-turn pointer, lifecycle status, and timestamps.
 
 This table does not store official card text, rulebook text, proprietary assets,
 seed data, or raw invite tokens.
@@ -50,7 +49,7 @@ privilege and creates no delete policy.
 - Create game plus the initial `owner` membership transactionally.
 - Validate lifecycle transitions such as setup to active, completed, and
   archived.
-- Validate future `current_turn_id` changes after the `turns` table exists.
+- Validate `current_turn_id` changes now that it references `turns(id)`.
 
 ## Security Notes
 

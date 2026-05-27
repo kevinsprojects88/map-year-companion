@@ -8,6 +8,18 @@ Most access rules answer:
 
 > Is `auth.uid()` an active member of this game, and does their role/current turn status allow this action?
 
+Phase 3 defines the schema and RLS foundation only. Some official write flows
+are intentionally deferred to future server actions or trusted services,
+including game creation, invite acceptance, start-game, turn commit, official
+community-state changes, and game-event creation.
+
+Game creation must create the `games` row and the initial `owner`
+`game_memberships` row transactionally. A game shell without its owner
+membership is not a complete product flow.
+
+`game_events` are the official ledger entries for committed game history. Chat
+messages remain discussion and must not be treated as official history.
+
 ## Entities
 
 ### `profiles`
@@ -45,7 +57,7 @@ Most access rules answer:
 | `user_id` | references profiles |
 | `role` | `owner`, `admin`, `player` |
 | `turn_order_index` | required before start |
-| `status` | `invited`, `active`, `removed` |
+| `status` | `active`, `removed` |
 | `joined_at` | nullable |
 
 ### `game_invites`
@@ -54,7 +66,7 @@ Most access rules answer:
 |---|---|
 | `id` | uuid |
 | `game_id` | references games |
-| `token_hash` | store hash, not raw token if possible |
+| `token_hash` | required token hash only; raw invite tokens are never stored |
 | `created_by` | profile/user id |
 | `expires_at` | nullable |
 | `max_uses` | nullable |
@@ -314,6 +326,9 @@ Event types may include:
 - `story_poll_created`
 - `process_vote_started`
 - `turn_reassigned`
+- `project_changed`
+- `resource_changed`
+- `discontent_changed`
 - `game_completed`
 - `game_archived`
 
