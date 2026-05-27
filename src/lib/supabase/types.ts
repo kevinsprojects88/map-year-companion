@@ -13,12 +13,31 @@ export type Database = {
       chat_message_type: "player" | "system";
       deck_source_type: "placeholder" | "manual" | "json_import" | "private_poc";
       deck_status: "draft" | "valid" | "locked";
+      game_event_type:
+        | "game_created"
+        | "player_joined"
+        | "deck_configured"
+        | "initial_map_created"
+        | "game_started"
+        | "turn_draft_saved"
+        | "turn_committed"
+        | "map_revision_created"
+        | "story_poll_created"
+        | "process_vote_started"
+        | "turn_reassigned"
+        | "project_changed"
+        | "resource_changed"
+        | "discontent_changed"
+        | "game_completed"
+        | "game_archived";
       game_member_role: "owner" | "admin" | "player";
       game_member_status: "active" | "removed";
       game_status: "setup" | "active" | "completed" | "archived";
       process_vote_response: "yes" | "no" | "abstain";
       process_vote_status: "open" | "passed" | "failed" | "cancelled";
       process_vote_type: "reassign_stuck_turn";
+      project_status: "active" | "completed" | "abandoned";
+      resource_status: "abundance" | "scarcity" | "neutral" | "custom";
       story_poll_status: "open" | "closed";
       system_message_type: "info" | "warning" | "process" | "state_change";
       turn_status: "active" | "completed" | "reassigned" | "skipped";
@@ -176,6 +195,58 @@ export type Database = {
           source_type?: Database["public"]["Enums"]["deck_source_type"];
           status?: Database["public"]["Enums"]["deck_status"];
           updated_at?: string;
+        };
+      };
+      discontent_entries: {
+        Insert: {
+          count: number;
+          created_at?: string;
+          game_id: string;
+          holder_user_id?: string | null;
+          id?: string;
+          linked_turn_id?: string | null;
+          reason?: string | null;
+        };
+        Relationships: [
+          {
+            columns: ["game_id"];
+            foreignKeyName: "discontent_entries_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          },
+          {
+            columns: ["holder_user_id"];
+            foreignKeyName: "discontent_entries_holder_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+          {
+            columns: ["linked_turn_id"];
+            foreignKeyName: "discontent_entries_linked_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          }
+        ];
+        Row: {
+          count: number;
+          created_at: string;
+          game_id: string;
+          holder_user_id: string | null;
+          id: string;
+          linked_turn_id: string | null;
+          reason: string | null;
+        };
+        Update: {
+          count?: number;
+          created_at?: string;
+          game_id?: string;
+          holder_user_id?: string | null;
+          id?: string;
+          linked_turn_id?: string | null;
+          reason?: string | null;
         };
       };
       game_invites: {
@@ -337,6 +408,61 @@ export type Database = {
           updated_at?: string;
         };
       };
+      game_events: {
+        Insert: {
+          actor_id?: string | null;
+          created_at?: string;
+          event_type: Database["public"]["Enums"]["game_event_type"];
+          game_id: string;
+          id?: string;
+          payload?: Json | null;
+          summary: string;
+          turn_id?: string | null;
+        };
+        Relationships: [
+          {
+            columns: ["actor_id"];
+            foreignKeyName: "game_events_actor_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+          {
+            columns: ["game_id"];
+            foreignKeyName: "game_events_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          },
+          {
+            columns: ["turn_id"];
+            foreignKeyName: "game_events_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          }
+        ];
+        Row: {
+          actor_id: string | null;
+          created_at: string;
+          event_type: Database["public"]["Enums"]["game_event_type"];
+          game_id: string;
+          id: string;
+          payload: Json | null;
+          summary: string;
+          turn_id: string | null;
+        };
+        Update: {
+          actor_id?: string | null;
+          created_at?: string;
+          event_type?: Database["public"]["Enums"]["game_event_type"];
+          game_id?: string;
+          id?: string;
+          payload?: Json | null;
+          summary?: string;
+          turn_id?: string | null;
+        };
+      };
       map_drafts: {
         Insert: {
           base_revision_id?: string | null;
@@ -457,6 +583,67 @@ export type Database = {
           turn_id?: string | null;
         };
       };
+      projects: {
+        Insert: {
+          completed_turn_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          game_id: string;
+          id?: string;
+          name: string;
+          remaining_weeks?: number | null;
+          started_turn_id?: string | null;
+          status?: Database["public"]["Enums"]["project_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            columns: ["completed_turn_id"];
+            foreignKeyName: "projects_completed_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          },
+          {
+            columns: ["game_id"];
+            foreignKeyName: "projects_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          },
+          {
+            columns: ["started_turn_id"];
+            foreignKeyName: "projects_started_turn_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "turns";
+          }
+        ];
+        Row: {
+          completed_turn_id: string | null;
+          created_at: string;
+          description: string | null;
+          game_id: string;
+          id: string;
+          name: string;
+          remaining_weeks: number | null;
+          started_turn_id: string | null;
+          status: Database["public"]["Enums"]["project_status"];
+          updated_at: string;
+        };
+        Update: {
+          completed_turn_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          game_id?: string;
+          id?: string;
+          name?: string;
+          remaining_weeks?: number | null;
+          started_turn_id?: string | null;
+          status?: Database["public"]["Enums"]["project_status"];
+          updated_at?: string;
+        };
+      };
       process_vote_responses: {
         Insert: {
           created_at?: string;
@@ -565,6 +752,44 @@ export type Database = {
           target_player_id?: string | null;
           turn_id?: string;
           vote_type?: Database["public"]["Enums"]["process_vote_type"];
+        };
+      };
+      resources: {
+        Insert: {
+          created_at?: string;
+          game_id: string;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          status?: Database["public"]["Enums"]["resource_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            columns: ["game_id"];
+            foreignKeyName: "resources_game_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "games";
+          }
+        ];
+        Row: {
+          created_at: string;
+          game_id: string;
+          id: string;
+          name: string;
+          notes: string | null;
+          status: Database["public"]["Enums"]["resource_status"];
+          updated_at: string;
+        };
+        Update: {
+          created_at?: string;
+          game_id?: string;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          status?: Database["public"]["Enums"]["resource_status"];
+          updated_at?: string;
         };
       };
       profiles: {
