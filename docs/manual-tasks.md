@@ -9,6 +9,9 @@
 | Create Supabase project during implementation setup. | Required for auth/database/RLS/realtime. | Complete |
 | Configure Magic Link / OTP auth and redirect URLs. | Required for auth and invite return routing. | Complete |
 | Add environment variables locally; never commit secrets. | Required for app/Supabase connection. | Complete |
+| Keep Vercel environment variables configured in the Vercel dashboard. | Hosted deploys need `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; values must not be committed or pasted into docs/chat. | Ongoing |
+| Keep Supabase redirect allowlist current for hosted and local auth callbacks. | The Vercel auth callback URL must stay allowed, and localhost callbacks should remain for local development. | Ongoing |
+| Run the hosted Vercel smoke test after relevant deploys. | Confirms sign-in, dashboard, game, lobby, invite, and turn-order flows on the private alpha. | Ongoing |
 | Run migrations as each phase creates them. | Phase 3 migrations `0001` through `0006` were manually applied through Supabase SQL Editor; future migrations still need apply/verification as they are created. | Ongoing |
 | Install and configure Supabase CLI for repeatable local/hosted verification. | Enables migration history, RLS/grant checks, advisors, and generated types without relying only on SQL Editor. | Future |
 | Verify the current account has a `profiles` row. | Confirms profile setup can read/write the signed-in user's profile. | Complete |

@@ -7,6 +7,9 @@ flow evidence without adding invite management, email, revoke, player list,
 dashboard indicators, setup features, schema/RLS changes, or product behavior
 changes.
 
+For hosted Vercel deployment smoke coverage, use
+`docs/qa/vercel-hosted-smoke-test.md`.
+
 ## Manual Checks
 
 | Check | Expected Result | Status |

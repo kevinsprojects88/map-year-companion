@@ -98,6 +98,18 @@ Realtime:
 - UI refresh only.
 - Never authority.
 
+Hosted deployment:
+
+- Hosted private alpha: `https://map-year-companion.vercel.app/`.
+- Normal flow: Codex task, review, commit, push, Vercel deploys from `main`, then hosted smoke test when relevant.
+- Migration-bearing flow: review migration SQL, apply Supabase SQL before pushing dependent app code when possible, verify SQL, commit/push, Vercel deploys, then hosted smoke test.
+- Vercel environment variables live in the Vercel dashboard.
+- Never commit `.env.local`.
+- Never paste secrets or env values into docs or chat.
+- Vercel currently needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Keep the Vercel auth callback URL allowed in Supabase, and keep localhost callbacks for local development.
+- Use `docs/qa/vercel-hosted-smoke-test.md` for hosted smoke coverage.
+
 Commit & Advance:
 
 - Must be transaction-like.

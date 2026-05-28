@@ -12,6 +12,31 @@ First playable milestone:
 
 > Chat + Story Poll + one committed turn, with map shell acceptable.
 
+## Hosted Private Alpha
+
+Hosted private alpha URL:
+
+> https://map-year-companion.vercel.app/
+
+Vercel is connected to the GitHub repo and deploys from `main`.
+
+Normal deployment workflow:
+
+1. Complete the Codex task in a narrow slice.
+2. Review the diff and run the requested checks.
+3. Commit and push.
+4. Let Vercel deploy from GitHub.
+5. Run the hosted smoke test when the task touches hosted auth, dashboard, game, lobby, invite, or turn-order behavior.
+
+Migration-bearing workflow:
+
+1. Review the migration SQL and expected RLS/permission impact.
+2. Apply the Supabase SQL before pushing app code that depends on it when possible.
+3. Verify the SQL with the appropriate local/hosted check or SQL Editor evidence.
+4. Commit and push after the database path is ready or the blocker is explicitly reported.
+5. Let Vercel deploy from GitHub.
+6. Run the hosted smoke test for affected flows.
+
 ## Broad Phases
 
 | Phase | Name | Goal |
