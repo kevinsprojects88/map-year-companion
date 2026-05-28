@@ -1,12 +1,12 @@
 import "server-only";
 
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
+import { buildLobbySetupReadiness } from "@/lib/lobby/setup-readiness";
 import type { Database } from "@/lib/supabase/types";
 import type {
   LobbyRosterMemberViewModel,
   LobbyStatusViewModel
 } from "@/types/lobby";
-import type { SetupChecklistItem } from "@/types/setup";
 
 type GameStatus = Database["public"]["Enums"]["game_status"];
 type GameMemberRole = Database["public"]["Enums"]["game_member_role"];
@@ -155,119 +155,6 @@ function buildRosterMemberViewModel(
   };
 }
 
-function buildLobbySetupChecklistItems({
-  isOwnerAdmin,
-  memberCount
-}: {
-  isOwnerAdmin: boolean;
-  memberCount: number;
-}): SetupChecklistItem[] {
-  const hasMultipleMembers = memberCount >= 2;
-  const memberCountLabel = getMemberCountLabel(memberCount);
-
-  return [
-    {
-      actionDisabledReason: isOwnerAdmin
-        ? "Use the invite form on this page; this checklist card is status-only."
-        : "Only owner/admin members can create invite links.",
-      actionLabel: isOwnerAdmin ? "Available below" : "Owner/admin only",
-      description: isOwnerAdmin
-        ? "Owner/admin invite creation is available in this lobby."
-        : "Invite creation is hidden for player members.",
-      requirement: "required",
-      status: isOwnerAdmin ? "complete" : "blocked",
-      title: "Invite link",
-      validationMessages: [
-        isOwnerAdmin
-          ? "Private invite creation exists for owner/admin members."
-          : "Player members can view setup status but cannot create invite links."
-      ]
-    },
-    {
-      actionDisabledReason:
-        "Player list management is deferred; this card only reports the current active member count.",
-      actionLabel: "Status only",
-      description:
-        "The lobby shows the active member roster and current setup count.",
-      requirement: "required",
-      status: hasMultipleMembers ? "complete" : "warning",
-      title: "Players invited",
-      validationMessages: [
-        `${memberCountLabel} confirmed.`,
-        hasMultipleMembers
-          ? "The recommended two-or-more-player baseline is met."
-          : "Invite another player before starting if this should be a group game."
-      ]
-    },
-    {
-      actionDisabledReason: isOwnerAdmin
-        ? "Use the turn order editor on this page; this checklist card is status-only."
-        : "Only owner/admin members can save turn order changes.",
-      actionLabel: isOwnerAdmin ? "Available above" : "View only",
-      description: isOwnerAdmin
-        ? "Owner/admin turn order editing is available in this lobby."
-        : "Current turn order remains read-only for player members.",
-      requirement: "required",
-      status: "complete",
-      title: "Turn order",
-      validationMessages: [
-        isOwnerAdmin
-          ? "Active members can be reordered without changing roles, status, or membership."
-          : "Players can view active member order but cannot edit it."
-      ]
-    },
-    {
-      actionDisabledReason: "Deck setup is deferred to the dedicated deck phase.",
-      actionLabel: "Coming later",
-      description:
-        "Deck/card setup will use user-provided content in a later slice.",
-      requirement: "required",
-      status: "blocked",
-      title: "Deck/card setup",
-      validationMessages: [
-        "No deck editor, card import, or official/proprietary content is added here."
-      ]
-    },
-    {
-      actionDisabledReason: "Initial map setup is deferred to the map setup phase.",
-      actionLabel: "Coming later",
-      description:
-        "The initial map setup route and editor are not part of this slice.",
-      requirement: "required",
-      status: "blocked",
-      title: "Initial map",
-      validationMessages: [
-        "No map editor, map draft, or baseline map revision is created here."
-      ]
-    },
-    {
-      actionDisabledReason: "Community notes editing is deferred.",
-      actionLabel: "Coming later",
-      description:
-        "Shared setup notes will become structured later; this page stays read-only for now.",
-      requirement: "optional",
-      status: "optional",
-      title: "Community notes",
-      validationMessages: [
-        "No notes editor, comments, chat, or realtime behavior is added here."
-      ]
-    },
-    {
-      actionDisabledReason:
-        "Start-game behavior is blocked until the setup steps have real validation.",
-      actionLabel: "Blocked",
-      description:
-        "Starting the game remains unavailable until deck, map, and turn setup exist.",
-      requirement: "required",
-      status: "blocked",
-      title: "Start game",
-      validationMessages: [
-        "No start-game action, turn creation, or game status mutation is added in this slice."
-      ]
-    }
-  ];
-}
-
 function buildLobbyStatusViewModel({
   game,
   membership,
@@ -280,6 +167,17 @@ function buildLobbyStatusViewModel({
   const isOwnerAdmin = canRoleCreateInvites(membership.role);
   const memberCount = rosterMembers.length;
   const memberCountLabel = getMemberCountLabel(memberCount);
+  const setupReadiness = buildLobbySetupReadiness({
+    gameStatus: game.status,
+    gameStatusLabel: gameStatusLabels[game.status],
+    isOwnerAdmin,
+    memberCount,
+    memberCountLabel,
+    rosterMembers: rosterMembers.map((member) => ({
+      displayName: member.displayName,
+      turnOrderIndex: member.turnOrderIndex
+    }))
+  });
 
   return {
     game: {
@@ -307,10 +205,8 @@ function buildLobbyStatusViewModel({
       readOnlyLabel:
         "This roster is read-only; player removal, role changes, and status changes are not available."
     },
-    setupChecklistItems: buildLobbySetupChecklistItems({
-      isOwnerAdmin,
-      memberCount
-    })
+    setupChecklistItems: setupReadiness.items,
+    setupReadinessSummary: setupReadiness.summary
   };
 }
 
@@ -415,7 +311,6 @@ async function getLobbyStatusForCurrentUser(
 
 export {
   buildRosterMemberViewModel,
-  buildLobbySetupChecklistItems,
   buildLobbyStatusViewModel,
   getLobbyStatusForCurrentUser
 };

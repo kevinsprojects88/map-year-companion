@@ -3,7 +3,10 @@ import type {
   UpdateTurnOrderFieldErrors,
   UpdateTurnOrderValues
 } from "@/lib/validation/turn-order.schema";
-import type { SetupChecklistItem } from "@/types/setup";
+import type {
+  SetupChecklistItem,
+  SetupReadinessSummary
+} from "@/types/setup";
 
 type LobbyGameStatus = Database["public"]["Enums"]["game_status"];
 type LobbyMembershipRole = Database["public"]["Enums"]["game_member_role"];
@@ -50,6 +53,7 @@ type LobbyStatusViewModel = {
     readOnlyLabel: string;
   };
   setupChecklistItems: SetupChecklistItem[];
+  setupReadinessSummary: SetupReadinessSummary;
 };
 
 type UpdateTurnOrderActionState = {

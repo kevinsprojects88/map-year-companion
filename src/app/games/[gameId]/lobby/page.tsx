@@ -73,7 +73,7 @@ export default async function GameLobbyPage({
           </Link>
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Phase 5C</Badge>
+              <Badge variant="secondary">Phase 5D</Badge>
               <Badge variant="outline">Member-scoped lobby</Badge>
               <Badge variant="waiting">{lobby.game.statusLabel}</Badge>
             </div>
@@ -81,10 +81,10 @@ export default async function GameLobbyPage({
               {lobby.game.name}
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              This private lobby now lets owner/admin members edit active
-              member turn order while players keep a read-only roster view.
-              Setup is not complete yet, and deck, map, notes, and start-game
-              actions remain disabled for later slices.
+              This private lobby now reports setup readiness from active member
+              count and saved turn order. Owner/admin controls stay limited to
+              invite creation and turn-order editing; deck, map, notes, and
+              start-game actions remain disabled for later slices.
             </p>
           </div>
         </section>
@@ -161,7 +161,10 @@ export default async function GameLobbyPage({
 
             <LobbyRoster roster={lobby.roster} />
 
-            <LobbySetupStatus items={lobby.setupChecklistItems} />
+            <LobbySetupStatus
+              items={lobby.setupChecklistItems}
+              summary={lobby.setupReadinessSummary}
+            />
 
             {lobby.membership.canCreateInvites ? (
               <CreateInviteForm gameId={lobby.game.id} />
@@ -182,10 +185,10 @@ export default async function GameLobbyPage({
               </h2>
               <p>
                 The lobby reads the game, your active membership, and active
-                member roster. Owner/admin turn-order edits update only member
-                order. It does not read invite lists, deck records, map records,
-                notes, player-management records, or private proof-of-concept
-                content.
+                member roster, including saved turn order. Owner/admin
+                turn-order edits update only member order. It does not read
+                invite lists, deck records, map records, notes,
+                player-management records, or private proof-of-concept content.
               </p>
             </div>
           </aside>

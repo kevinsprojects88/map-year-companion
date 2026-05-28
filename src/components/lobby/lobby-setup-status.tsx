@@ -15,11 +15,13 @@ import { Button, type ButtonVariant } from "@/components/ui/button";
 import type {
   SetupChecklistItem,
   SetupChecklistRequirement,
+  SetupReadinessSummary,
   SetupChecklistStatus
 } from "@/types/setup";
 
 type LobbySetupStatusProps = {
   items: SetupChecklistItem[];
+  summary: SetupReadinessSummary;
 };
 
 type SetupStatusDisplay = {
@@ -47,7 +49,7 @@ const setupStatusDisplay: Record<SetupChecklistStatus, SetupStatusDisplay> = {
   },
   incomplete: {
     actionVariant: "secondary",
-    badgeLabel: "Later",
+    badgeLabel: "Incomplete",
     badgeVariant: "outline",
     cardVariant: "default",
     marker: "TODO"
@@ -78,6 +80,10 @@ const requirementDisplay: Record<
 
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
+}
+
+function formatSummaryList(labels: string[]) {
+  return labels.length ? labels.join(", ") : "None";
 }
 
 function ChecklistAction({ item }: { item: SetupChecklistItem }) {
@@ -111,7 +117,7 @@ function ChecklistAction({ item }: { item: SetupChecklistItem }) {
   );
 }
 
-function LobbySetupStatus({ items }: LobbySetupStatusProps) {
+function LobbySetupStatus({ items, summary }: LobbySetupStatusProps) {
   return (
     <section aria-labelledby="lobby-setup-status-heading" className="grid gap-4">
       <div className="flex flex-col gap-2">
@@ -125,17 +131,75 @@ function LobbySetupStatus({ items }: LobbySetupStatusProps) {
           Setup is not complete yet
         </h2>
         <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-          These cards report the current lobby state and mark future setup
-          areas without enabling deck, map, turn, player-management, notes, or
-          start-game behavior.
+          These cards report real lobby readiness where data exists and mark
+          future setup areas without enabling deck, map, player-management,
+          notes, or start-game behavior.
         </p>
       </div>
+
+      <Card variant="raised">
+        <CardHeader className="gap-y-3">
+          <div className="col-start-1 flex flex-col gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="success">
+                {summary.readyCount} ready
+              </Badge>
+              <Badge variant="outline">{summary.totalCount} areas</Badge>
+            </div>
+            <CardTitle>{summary.summaryLabel}</CardTitle>
+            <CardDescription>{summary.roleDescription}</CardDescription>
+          </div>
+          <CardAction>
+            <Badge variant="readOnly">Status only</Badge>
+          </CardAction>
+        </CardHeader>
+
+        <CardContent>
+          <dl className="grid gap-3 text-sm leading-6 md:grid-cols-2">
+            <div className="rounded-md border border-[var(--state-success-border)] bg-[var(--state-success-surface)] p-3 text-[var(--state-success-text)]">
+              <dt className="font-mono text-xs font-semibold uppercase">
+                Ready areas
+              </dt>
+              <dd className="mt-1">{formatSummaryList(summary.readyAreaLabels)}</dd>
+            </div>
+            <div className="rounded-md border border-[var(--state-warning-border)] bg-[var(--state-warning-surface)] p-3 text-[var(--state-warning-text)]">
+              <dt className="font-mono text-xs font-semibold uppercase">
+                Needs attention
+              </dt>
+              <dd className="mt-1">
+                {formatSummaryList(summary.needsAttentionAreaLabels)}
+              </dd>
+            </div>
+            <div className="rounded-md border border-border bg-surface p-3 text-muted-foreground">
+              <dt className="font-mono text-xs font-semibold uppercase">
+                Future areas
+              </dt>
+              <dd className="mt-1">
+                {formatSummaryList(summary.futureAreaLabels)}
+              </dd>
+            </div>
+            <div className="rounded-md border border-[var(--state-error-border)] bg-[var(--state-error-surface)] p-3 text-[var(--state-error-text)]">
+              <dt className="font-mono text-xs font-semibold uppercase">
+                Blocked areas
+              </dt>
+              <dd className="mt-1">
+                {formatSummaryList(summary.blockedAreaLabels)}
+              </dd>
+            </div>
+          </dl>
+        </CardContent>
+
+        <CardFooter>
+          This summary does not start the game or change setup data.
+        </CardFooter>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         {items.map((item) => {
           const status = setupStatusDisplay[item.status];
           const requirement = requirementDisplay[item.requirement];
           const validationMessages = item.validationMessages ?? [];
+          const badgeLabel = item.statusLabel ?? status.badgeLabel;
 
           return (
             <Card
@@ -154,7 +218,7 @@ function LobbySetupStatus({ items }: LobbySetupStatusProps) {
                       >
                         {status.marker}
                       </span>
-                      <span>{status.badgeLabel}</span>
+                      <span>{badgeLabel}</span>
                     </Badge>
                     <Badge variant={requirement.variant}>
                       {requirement.label}
