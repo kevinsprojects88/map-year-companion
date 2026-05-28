@@ -59,6 +59,19 @@ export type Database = {
         };
         Returns: string;
       };
+      update_game_turn_order: {
+        Args: {
+          ordered_profile_ids: string[];
+          target_game_id: string;
+        };
+        Returns: {
+          membership_id: string;
+          role: Database["public"]["Enums"]["game_member_role"];
+          status: Database["public"]["Enums"]["game_member_status"];
+          turn_order_index: number;
+          user_id: string;
+        }[];
+      };
     };
     Tables: {
       chat_messages: {

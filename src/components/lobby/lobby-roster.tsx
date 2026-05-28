@@ -27,7 +27,8 @@ function LobbyRoster({ roster }: LobbyRosterProps) {
             <CardTitle id="lobby-roster-heading">Players</CardTitle>
             <CardDescription>
               Active game members can see the current roster and turn order.
-              Editing comes in a later lobby slice.
+              Player removal, role changes, and status changes are not part of
+              this lobby slice.
             </CardDescription>
           </div>
           <CardAction>

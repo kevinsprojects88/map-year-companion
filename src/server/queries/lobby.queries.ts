@@ -200,15 +200,20 @@ function buildLobbySetupChecklistItems({
       ]
     },
     {
-      actionDisabledReason: "Turn order editing comes in a later Phase 5 slice.",
-      actionLabel: "Coming later",
-      description:
-        "Current turn order is visible in the read-only roster; editing comes later.",
+      actionDisabledReason: isOwnerAdmin
+        ? "Use the turn order editor on this page; this checklist card is status-only."
+        : "Only owner/admin members can save turn order changes.",
+      actionLabel: isOwnerAdmin ? "Available above" : "View only",
+      description: isOwnerAdmin
+        ? "Owner/admin turn order editing is available in this lobby."
+        : "Current turn order remains read-only for player members.",
       requirement: "required",
-      status: "incomplete",
+      status: "complete",
       title: "Turn order",
       validationMessages: [
-        "No turn order editing or player management is available in Phase 5B."
+        isOwnerAdmin
+          ? "Active members can be reordered without changing roles, status, or membership."
+          : "Players can view active member order but cannot edit it."
       ]
     },
     {
@@ -300,7 +305,7 @@ function buildLobbyStatusViewModel({
       memberCountLabel,
       members: rosterMembers,
       readOnlyLabel:
-        "Turn order editing, player removal, and role changes come later."
+        "This roster is read-only; player removal, role changes, and status changes are not available."
     },
     setupChecklistItems: buildLobbySetupChecklistItems({
       isOwnerAdmin,

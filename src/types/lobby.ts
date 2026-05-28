@@ -1,4 +1,8 @@
 import type { Database } from "@/lib/supabase/types";
+import type {
+  UpdateTurnOrderFieldErrors,
+  UpdateTurnOrderValues
+} from "@/lib/validation/turn-order.schema";
 import type { SetupChecklistItem } from "@/types/setup";
 
 type LobbyGameStatus = Database["public"]["Enums"]["game_status"];
@@ -48,10 +52,18 @@ type LobbyStatusViewModel = {
   setupChecklistItems: SetupChecklistItem[];
 };
 
+type UpdateTurnOrderActionState = {
+  fieldErrors: UpdateTurnOrderFieldErrors;
+  formError: string | null;
+  status: "idle" | "error" | "success";
+  values: UpdateTurnOrderValues;
+};
+
 export type {
   LobbyGameStatus,
   LobbyMembershipRole,
   LobbyMembershipStatus,
   LobbyRosterMemberViewModel,
-  LobbyStatusViewModel
+  LobbyStatusViewModel,
+  UpdateTurnOrderActionState
 };

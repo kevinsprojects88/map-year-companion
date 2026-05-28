@@ -35,9 +35,15 @@ membership bootstrap are transactional.
 
 ### Update
 
-Authenticated owner/admin members can update membership `status` and
-`turn_order_index` for games they manage. Normal authenticated clients are not
-granted direct role updates in this slice.
+Authenticated owner/admin members do not receive a direct table update grant in
+Phase 5C. Earlier direct `status` / `turn_order_index` update grants are revoked
+so this slice cannot become a player-removal or status-change path.
+
+Phase 5C adds `public.update_game_turn_order(target_game_id,
+ordered_profile_ids)` for turn-order edits. The RPC accepts only the target game
+and ordered active profile ids, validates owner/admin membership, locks active
+memberships, verifies every active member is included exactly once, and updates
+only `turn_order_index`.
 
 ### Delete
 
@@ -51,6 +57,9 @@ unless a future maintenance path explicitly requires hard deletes.
   initial `owner` membership when a game is created.
 - Use `public.accept_game_invite(invite_token_hash)` to accept invites by token
   hash and create only active `player` memberships for the authenticated user.
+- Use `public.update_game_turn_order(target_game_id, ordered_profile_ids)` for
+  owner/admin turn-order edits so swaps happen transactionally and avoid active
+  turn-order uniqueness conflicts.
 - Enforce owner transfer and role-change rules.
 - Keep removed memberships removed until an explicit owner/admin reactivation
   path is designed.
