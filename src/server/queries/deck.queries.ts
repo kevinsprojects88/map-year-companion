@@ -1,7 +1,11 @@
 import "server-only";
 
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
-import { REQUIRED_DECK_CARD_COUNT } from "@/lib/lobby/setup-readiness";
+import {
+  REQUIRED_DECK_WEEK_COUNT,
+  calculateDeckCoverage,
+  type DeckCoverageSummary
+} from "@/lib/decks/deck-coverage";
 import type { Database } from "@/lib/supabase/types";
 import type { DeckCardViewModel, DeckSetupViewModel } from "@/types/deck";
 
@@ -114,23 +118,54 @@ function getCardCountLabel(cardCount: number) {
 }
 
 function getConfiguredCountLabel(cardCount: number) {
-  return `${cardCount} / ${REQUIRED_DECK_CARD_COUNT} cards configured`;
+  return `${cardCount} / ${REQUIRED_DECK_WEEK_COUNT} cards configured`;
 }
 
 function getPromptTextCountLabel(promptTextCount: number) {
-  return `${promptTextCount} / ${REQUIRED_DECK_CARD_COUNT} cards have prompt text`;
+  return `${promptTextCount} / ${REQUIRED_DECK_WEEK_COUNT} cards have prompt text`;
 }
 
 function hasPromptText(card: Pick<DeckCardRow, "prompt_text">) {
   return Boolean(card.prompt_text?.trim());
 }
 
-function isDeckMeaningfullyComplete(deck: DeckRow, cards: DeckCardRow[]) {
-  const promptTextCount = cards.filter(hasPromptText).length;
+function getUniqueWeekCountLabel(uniqueWeekCount: number) {
+  return `${uniqueWeekCount} / ${REQUIRED_DECK_WEEK_COUNT} weeks configured`;
+}
 
+function getMissingWeekCountLabel(missingWeekCount: number) {
+  return `${missingWeekCount} ${missingWeekCount === 1 ? "week" : "weeks"} missing`;
+}
+
+function getBlankPromptCountLabel(blankPromptCount: number) {
+  return blankPromptCount === 0
+    ? "No blank prompts"
+    : `${blankPromptCount} blank ${blankPromptCount === 1 ? "prompt" : "prompts"}`;
+}
+
+function getDuplicateWeekWarningLabel(duplicateWeekNumbers: number[]) {
+  return duplicateWeekNumbers.length
+    ? `Duplicate week warning: ${duplicateWeekNumbers.join(", ")}`
+    : null;
+}
+
+function getDeckCoverage(cards: DeckCardRow[]) {
+  return calculateDeckCoverage(
+    cards.map((card) => ({
+      promptText: card.prompt_text,
+      weekNumber: card.week_number
+    }))
+  );
+}
+
+function isDeckMeaningfullyComplete(
+  deck: DeckRow,
+  coverage: DeckCoverageSummary
+) {
   return (
-    cards.length >= REQUIRED_DECK_CARD_COUNT &&
-    promptTextCount >= REQUIRED_DECK_CARD_COUNT &&
+    coverage.allWeeksRepresented &&
+    coverage.allConfiguredCardsHavePromptText &&
+    !coverage.hasDuplicateWeekNumbers &&
     (deck.status === "valid" ||
       deck.status === "locked" ||
       Boolean(deck.locked_at))
@@ -169,14 +204,30 @@ function buildDeckSetupViewModel({
   membership: Pick<DeckMembershipRow, "role">;
 }): DeckSetupViewModel {
   const userIsOwnerAdmin = isOwnerAdmin(membership.role);
-  const cardCount = cards.length;
-  const promptTextCount = cards.filter(hasPromptText).length;
+  const coverage = getDeckCoverage(cards);
+  const cardCount = coverage.configuredCardCount;
+  const promptTextCount = coverage.promptFilledCount;
   const cardSetup = {
+    allConfiguredCardsHavePromptText:
+      coverage.allConfiguredCardsHavePromptText,
+    allWeeksRepresented: coverage.allWeeksRepresented,
+    blankPromptCount: coverage.blankPromptCount,
+    blankPromptCountLabel: getBlankPromptCountLabel(coverage.blankPromptCount),
     cardCount,
     cardCountLabel: getCardCountLabel(cardCount),
     configuredCountLabel: getConfiguredCountLabel(cardCount),
+    duplicateWeekNumbers: coverage.duplicateWeekNumbers,
+    duplicateWeekWarningLabel: getDuplicateWeekWarningLabel(
+      coverage.duplicateWeekNumbers
+    ),
+    hasDuplicateWeekNumbers: coverage.hasDuplicateWeekNumbers,
+    missingWeekCount: coverage.missingWeekCount,
+    missingWeekCountLabel: getMissingWeekCountLabel(coverage.missingWeekCount),
+    missingWeekPreviewLabel: coverage.missingWeekPreviewLabel,
     promptTextCount,
-    promptTextCountLabel: getPromptTextCountLabel(promptTextCount)
+    promptTextCountLabel: getPromptTextCountLabel(promptTextCount),
+    uniqueWeekCount: coverage.uniqueWeekCount,
+    uniqueWeekCountLabel: getUniqueWeekCountLabel(coverage.uniqueWeekCount)
   };
 
   if (!deck) {
@@ -206,8 +257,13 @@ function buildDeckSetupViewModel({
     };
   }
 
-  const complete = isDeckMeaningfullyComplete(deck, cards);
+  const complete = isDeckMeaningfullyComplete(deck, coverage);
   const isLocked = deck.status === "locked" || Boolean(deck.locked_at);
+  const preparedDraft =
+    deck.status === "draft" &&
+    coverage.allWeeksRepresented &&
+    coverage.allConfiguredCardsHavePromptText &&
+    !coverage.hasDuplicateWeekNumbers;
 
   return {
     cardSetup,
@@ -238,9 +294,15 @@ function buildDeckSetupViewModel({
       canCreateDraftDeck: false,
       description: complete
         ? "Deck setup has a saved status that can support later start validation."
-        : "A draft deck exists. Manual card entry is available to owner/admin members while validation remains conservative.",
+        : preparedDraft
+          ? "All 52 weeks are represented, but deck locking is not built yet."
+          : "A draft deck exists. Manual card entry is available to owner/admin members while validation remains conservative.",
       readinessCategory: complete ? "complete" : "incomplete",
-      statusLabel: complete ? "Complete" : "In progress"
+      statusLabel: complete
+        ? "Complete"
+        : preparedDraft
+          ? "Prepared, not locked"
+          : "In progress"
     }
   };
 }

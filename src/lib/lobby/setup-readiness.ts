@@ -51,11 +51,42 @@ function formatAreaList(areaLabels: string[]) {
   return areaLabels.length ? areaLabels.join(", ") : "None";
 }
 
+function getDeckSetupCoverage(deckSetup: DeckSetupReadinessInput) {
+  const promptTextCount = deckSetup.promptTextCount ?? 0;
+  const uniqueWeekCount =
+    deckSetup.uniqueWeekCount ??
+    Math.min(deckSetup.cardCount, REQUIRED_DECK_CARD_COUNT);
+  const blankPromptCount =
+    deckSetup.blankPromptCount ??
+    Math.max(deckSetup.cardCount - promptTextCount, 0);
+  const missingWeekCount =
+    deckSetup.missingWeekCount ??
+    Math.max(REQUIRED_DECK_CARD_COUNT - uniqueWeekCount, 0);
+
+  return {
+    allConfiguredCardsHavePromptText:
+      deckSetup.allConfiguredCardsHavePromptText ??
+      promptTextCount === deckSetup.cardCount,
+    allWeeksRepresented:
+      deckSetup.allWeeksRepresented ?? uniqueWeekCount >= REQUIRED_DECK_CARD_COUNT,
+    blankPromptCount,
+    duplicateWeekNumbers: deckSetup.duplicateWeekNumbers ?? [],
+    hasDuplicateWeekNumbers: deckSetup.hasDuplicateWeekNumbers ?? false,
+    missingWeekCount,
+    missingWeekPreviewLabel: deckSetup.missingWeekPreviewLabel ?? "None",
+    promptTextCount,
+    uniqueWeekCount
+  };
+}
+
 function isDeckSetupComplete(deckSetup: DeckSetupReadinessInput) {
+  const coverage = getDeckSetupCoverage(deckSetup);
+
   return (
     deckSetup.deckId !== null &&
-    deckSetup.cardCount >= REQUIRED_DECK_CARD_COUNT &&
-    (deckSetup.promptTextCount ?? 0) >= REQUIRED_DECK_CARD_COUNT &&
+    coverage.allWeeksRepresented &&
+    coverage.allConfiguredCardsHavePromptText &&
+    !coverage.hasDuplicateWeekNumbers &&
     (deckSetup.status === "valid" ||
       (deckSetup.status === "locked" && deckSetup.isLocked))
   );
@@ -68,10 +99,26 @@ function buildDeckSetupChecklistItem({
   deckSetup: DeckSetupReadinessInput;
   isOwnerAdmin: boolean;
 }): SetupChecklistItem {
+  const coverage = getDeckSetupCoverage(deckSetup);
   const cardCountLabel = `${deckSetup.cardCount} / ${REQUIRED_DECK_CARD_COUNT} cards configured`;
-  const promptTextCount = deckSetup.promptTextCount ?? 0;
+  const weekCoverageLabel = `${coverage.uniqueWeekCount} / ${REQUIRED_DECK_CARD_COUNT} weeks configured`;
+  const promptTextCount = coverage.promptTextCount;
   const promptTextCountLabel = `${promptTextCount} / ${REQUIRED_DECK_CARD_COUNT} cards have prompt text`;
+  const blankPromptLabel =
+    coverage.blankPromptCount > 0
+      ? `${coverage.blankPromptCount} ${coverage.blankPromptCount === 1 ? "card has" : "cards have"} blank or missing prompt text.`
+      : "No configured cards have blank prompt text.";
+  const missingWeeksLabel =
+    coverage.missingWeekCount > 0
+      ? `Missing weeks: ${coverage.missingWeekPreviewLabel}`
+      : "No missing weeks.";
+  const duplicateWeekLabel = coverage.hasDuplicateWeekNumbers
+    ? `Duplicate week warning: ${coverage.duplicateWeekNumbers.join(", ")}.`
+    : "No duplicate weeks detected.";
   const actionLabel = isOwnerAdmin ? "Open deck setup" : "View deck setup";
+  const roleGuidance = isOwnerAdmin
+    ? "Owner/admin members can use the one-card manual entry form for now; import and locking come later."
+    : "Deck setup is read-only for player members; owner/admin members manage manual card entry.";
 
   if (!deckSetup.deckId) {
     return {
@@ -86,7 +133,10 @@ function buildDeckSetupChecklistItem({
       validationMessages: [
         "No draft deck exists yet.",
         cardCountLabel,
+        weekCoverageLabel,
         promptTextCountLabel,
+        missingWeeksLabel,
+        roleGuidance,
         "No official/proprietary card content is included."
       ]
     };
@@ -105,29 +155,45 @@ function buildDeckSetupChecklistItem({
       title: "Deck/card setup",
       validationMessages: [
         cardCountLabel,
+        weekCoverageLabel,
         promptTextCountLabel,
+        blankPromptLabel,
+        duplicateWeekLabel,
         `Deck status is ${deckSetup.status}.`,
         "No start-game action is enabled by this checklist."
       ]
     };
   }
 
+  const hasPreparedDraftCoverage =
+    deckSetup.status === "draft" &&
+    coverage.allWeeksRepresented &&
+    coverage.allConfiguredCardsHavePromptText &&
+    !coverage.hasDuplicateWeekNumbers;
+
   return {
     actionHref: deckSetup.setupHref,
     actionLabel,
-    description:
-      "A draft deck exists, but card setup is not ready to start play.",
+    description: hasPreparedDraftCoverage
+      ? "All 52 weeks are represented, but the deck is still draft and not locked."
+      : "A draft deck exists, but card setup is not ready to start play.",
     readinessCategory: "incomplete",
     requirement: "required",
     status: "warning",
-    statusLabel: "In progress",
+    statusLabel: hasPreparedDraftCoverage ? "Prepared, not locked" : "In progress",
     title: "Deck/card setup",
     validationMessages: [
       cardCountLabel,
+      weekCoverageLabel,
       promptTextCountLabel,
+      blankPromptLabel,
+      missingWeeksLabel,
+      duplicateWeekLabel,
       `Deck source is ${deckSetup.sourceType ?? "not set"} and status is ${deckSetup.status ?? "not set"}.`,
-      "Draft deck exists but is not locked or validated.",
-      "Manual entry is minimal; JSON import is later.",
+      hasPreparedDraftCoverage
+        ? "All 52 weeks are represented, but deck locking is not built yet."
+        : "Draft deck exists but is not locked or validated.",
+      roleGuidance,
       "No official/proprietary card content is included."
     ]
   };

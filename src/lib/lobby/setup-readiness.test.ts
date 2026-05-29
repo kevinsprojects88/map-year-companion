@@ -188,17 +188,95 @@ test("marks a draft deck as in progress until it has meaningful validation", () 
   );
 });
 
+test("reports partial draft deck coverage by represented weeks", () => {
+  const readiness = buildLobbySetupReadiness({
+    ...orderedTwoMemberInput,
+    deckSetup: {
+      ...orderedTwoMemberInput.deckSetup,
+      allConfiguredCardsHavePromptText: true,
+      allWeeksRepresented: false,
+      blankPromptCount: 0,
+      cardCount: 1,
+      deckId: "11111111-1111-4111-8111-111111111111",
+      duplicateWeekNumbers: [],
+      hasDuplicateWeekNumbers: false,
+      missingWeekCount: 51,
+      missingWeekPreviewLabel: "2, 3, 4, 5, 6, 7, 8, 9, 10... +42 more",
+      promptTextCount: 1,
+      sourceType: "manual",
+      status: "draft",
+      uniqueWeekCount: 1
+    }
+  });
+  const deckItem = readiness.items.find(
+    (item) => item.title === "Deck/card setup"
+  );
+
+  assert.equal(deckItem?.status, "warning");
+  assert.equal(deckItem?.statusLabel, "In progress");
+  assert.equal(deckItem?.readinessCategory, "incomplete");
+  assert.match(
+    deckItem?.validationMessages?.join(" ") ?? "",
+    /1 \/ 52 weeks configured/i
+  );
+  assert.match(
+    deckItem?.validationMessages?.join(" ") ?? "",
+    /Missing weeks: 2, 3, 4, 5, 6, 7, 8, 9, 10\.\.\. \+42 more/i
+  );
+});
+
+test("keeps a full prompted draft deck prepared but not complete", () => {
+  const readiness = buildLobbySetupReadiness({
+    ...orderedTwoMemberInput,
+    deckSetup: {
+      ...orderedTwoMemberInput.deckSetup,
+      allConfiguredCardsHavePromptText: true,
+      allWeeksRepresented: true,
+      blankPromptCount: 0,
+      cardCount: 52,
+      deckId: "11111111-1111-4111-8111-111111111111",
+      duplicateWeekNumbers: [],
+      hasDuplicateWeekNumbers: false,
+      missingWeekCount: 0,
+      missingWeekPreviewLabel: "None",
+      promptTextCount: 52,
+      sourceType: "manual",
+      status: "draft",
+      uniqueWeekCount: 52
+    }
+  });
+  const deckItem = readiness.items.find(
+    (item) => item.title === "Deck/card setup"
+  );
+
+  assert.equal(deckItem?.status, "warning");
+  assert.equal(deckItem?.statusLabel, "Prepared, not locked");
+  assert.equal(deckItem?.readinessCategory, "incomplete");
+  assert.match(
+    deckItem?.validationMessages?.join(" ") ?? "",
+    /All 52 weeks are represented, but deck locking is not built yet/i
+  );
+});
+
 test("marks a valid full deck complete when the saved status supports it", () => {
   const readiness = buildLobbySetupReadiness({
     ...orderedTwoMemberInput,
     deckSetup: {
       ...orderedTwoMemberInput.deckSetup,
+      allConfiguredCardsHavePromptText: true,
+      allWeeksRepresented: true,
+      blankPromptCount: 0,
       cardCount: 52,
       deckId: "11111111-1111-4111-8111-111111111111",
+      duplicateWeekNumbers: [],
+      hasDuplicateWeekNumbers: false,
       isLocked: true,
+      missingWeekCount: 0,
+      missingWeekPreviewLabel: "None",
       promptTextCount: 52,
       sourceType: "manual",
-      status: "locked"
+      status: "valid",
+      uniqueWeekCount: 52
     }
   });
   const deckItem = readiness.items.find(
@@ -220,12 +298,20 @@ test("keeps a full deck incomplete until all saved cards have prompt text", () =
     ...orderedTwoMemberInput,
     deckSetup: {
       ...orderedTwoMemberInput.deckSetup,
+      allConfiguredCardsHavePromptText: false,
+      allWeeksRepresented: true,
+      blankPromptCount: 1,
       cardCount: 52,
       deckId: "11111111-1111-4111-8111-111111111111",
+      duplicateWeekNumbers: [],
+      hasDuplicateWeekNumbers: false,
       isLocked: true,
+      missingWeekCount: 0,
+      missingWeekPreviewLabel: "None",
       promptTextCount: 51,
       sourceType: "manual",
-      status: "locked"
+      status: "locked",
+      uniqueWeekCount: 52
     }
   });
   const deckItem = readiness.items.find(

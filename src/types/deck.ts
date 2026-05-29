@@ -15,13 +15,21 @@ type DeckGameStatus = Database["public"]["Enums"]["game_status"];
 type DeckMembershipRole = Database["public"]["Enums"]["game_member_role"];
 
 type DeckSetupReadinessInput = {
+  allConfiguredCardsHavePromptText?: boolean;
+  allWeeksRepresented?: boolean;
+  blankPromptCount?: number;
   cardCount: number;
   deckId: string | null;
+  duplicateWeekNumbers?: number[];
+  hasDuplicateWeekNumbers?: boolean;
   promptTextCount?: number;
   isLocked: boolean;
+  missingWeekCount?: number;
+  missingWeekPreviewLabel?: string;
   setupHref: string;
   sourceType: DeckSourceType | null;
   status: DeckStatus | null;
+  uniqueWeekCount?: number;
 };
 
 type DeckCardViewModel = {
@@ -40,11 +48,23 @@ type DeckCardViewModel = {
 
 type DeckSetupViewModel = {
   cardSetup: {
+    allConfiguredCardsHavePromptText: boolean;
+    allWeeksRepresented: boolean;
+    blankPromptCount: number;
+    blankPromptCountLabel: string;
     cardCount: number;
     cardCountLabel: string;
     configuredCountLabel: string;
+    duplicateWeekNumbers: number[];
+    duplicateWeekWarningLabel: string | null;
+    hasDuplicateWeekNumbers: boolean;
+    missingWeekCount: number;
+    missingWeekCountLabel: string;
+    missingWeekPreviewLabel: string;
     promptTextCount: number;
     promptTextCountLabel: string;
+    uniqueWeekCount: number;
+    uniqueWeekCountLabel: string;
   };
   cards: DeckCardViewModel[];
   deck: {

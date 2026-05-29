@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
+import { calculateDeckCoverage } from "@/lib/decks/deck-coverage";
 import { buildLobbySetupReadiness } from "@/lib/lobby/setup-readiness";
 import type { Database } from "@/lib/supabase/types";
 import type { DeckSetupReadinessInput } from "@/types/deck";
@@ -44,6 +45,11 @@ type LobbyRosterMembershipRow = Pick<
 type LobbyDeckRow = Pick<
   Database["public"]["Tables"]["decks"]["Row"],
   "id" | "locked_at" | "source_type" | "status"
+>;
+
+type LobbyDeckCardCoverageRow = Pick<
+  Database["public"]["Tables"]["deck_cards"]["Row"],
+  "prompt_text" | "week_number"
 >;
 
 type LobbyStatusQueryResult =
@@ -237,34 +243,63 @@ async function getLobbyDeckSetupReadiness({
     return null;
   }
 
+  const emptyCoverage = calculateDeckCoverage([]);
+
   if (!deckData) {
     return {
+      allConfiguredCardsHavePromptText:
+        emptyCoverage.allConfiguredCardsHavePromptText,
+      allWeeksRepresented: emptyCoverage.allWeeksRepresented,
+      blankPromptCount: emptyCoverage.blankPromptCount,
       cardCount: 0,
       deckId: null,
+      duplicateWeekNumbers: emptyCoverage.duplicateWeekNumbers,
+      hasDuplicateWeekNumbers: emptyCoverage.hasDuplicateWeekNumbers,
       isLocked: false,
+      missingWeekCount: emptyCoverage.missingWeekCount,
+      missingWeekPreviewLabel: emptyCoverage.missingWeekPreviewLabel,
+      promptTextCount: emptyCoverage.promptFilledCount,
       setupHref,
       sourceType: null,
-      status: null
+      status: null,
+      uniqueWeekCount: emptyCoverage.uniqueWeekCount
     };
   }
 
   const deck = deckData as LobbyDeckRow;
-  const { count, error: cardCountError } = await supabase
+  const { data: cardData, error: cardError } = await supabase
     .from("deck_cards")
-    .select("id", { count: "exact", head: true })
+    .select("week_number, prompt_text")
     .eq("deck_id", deck.id);
 
-  if (cardCountError) {
+  if (cardError) {
     return null;
   }
 
+  const coverage = calculateDeckCoverage(
+    ((cardData ?? []) as LobbyDeckCardCoverageRow[]).map((card) => ({
+      promptText: card.prompt_text,
+      weekNumber: card.week_number
+    }))
+  );
+
   return {
-    cardCount: count ?? 0,
+    allConfiguredCardsHavePromptText:
+      coverage.allConfiguredCardsHavePromptText,
+    allWeeksRepresented: coverage.allWeeksRepresented,
+    blankPromptCount: coverage.blankPromptCount,
+    cardCount: coverage.configuredCardCount,
     deckId: deck.id,
+    duplicateWeekNumbers: coverage.duplicateWeekNumbers,
+    hasDuplicateWeekNumbers: coverage.hasDuplicateWeekNumbers,
     isLocked: deck.status === "locked" || Boolean(deck.locked_at),
+    missingWeekCount: coverage.missingWeekCount,
+    missingWeekPreviewLabel: coverage.missingWeekPreviewLabel,
+    promptTextCount: coverage.promptFilledCount,
     setupHref,
     sourceType: deck.source_type,
-    status: deck.status
+    status: deck.status,
+    uniqueWeekCount: coverage.uniqueWeekCount
   };
 }
 

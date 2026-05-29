@@ -14,6 +14,7 @@ import { REQUIRED_DECK_CARD_COUNT } from "@/lib/lobby/setup-readiness";
 import type { DeckSetupViewModel } from "@/types/deck";
 
 import { CreateDraftDeckForm } from "./create-draft-deck-form";
+import { DeckCoverageSummary } from "./deck-coverage-summary";
 import { DeckCardList } from "./deck-card-list";
 import { ManualCardEntryForm } from "./manual-card-entry-form";
 
@@ -81,20 +82,23 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
 
         <Card variant="raised">
           <CardHeader>
-            <CardTitle>Card count</CardTitle>
+            <CardTitle>Coverage counts</CardTitle>
             <CardDescription>
-              Basic count only; validation rules are deferred.
+              Saved rows, represented weeks, and prompt-fill status.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">
+              {deckSetup.cardSetup.uniqueWeekCountLabel}
+            </p>
+            <p className="text-muted-foreground">
               {deckSetup.cardSetup.configuredCountLabel}
             </p>
             <p className="text-muted-foreground">
-              {deckSetup.cardSetup.cardCountLabel}
+              {deckSetup.cardSetup.promptTextCountLabel}
             </p>
             <p className="text-muted-foreground">
-              {deckSetup.cardSetup.promptTextCountLabel}
+              {deckSetup.cardSetup.missingWeekCountLabel}
             </p>
           </CardContent>
         </Card>
@@ -117,6 +121,8 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
           </CardContent>
         </Card>
       </div>
+
+      <DeckCoverageSummary deckSetup={deckSetup} />
 
       {deckSetup.deck ? (
         <Card variant="draft">
