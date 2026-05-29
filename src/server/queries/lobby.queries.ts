@@ -3,6 +3,7 @@ import "server-only";
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
 import { buildLobbySetupReadiness } from "@/lib/lobby/setup-readiness";
 import type { Database } from "@/lib/supabase/types";
+import type { DeckSetupReadinessInput } from "@/types/deck";
 import type {
   LobbyRosterMemberViewModel,
   LobbyStatusViewModel
@@ -39,6 +40,11 @@ type LobbyRosterMembershipRow = Pick<
 > & {
   profiles: LobbyProfileRow | LobbyProfileRow[] | null;
 };
+
+type LobbyDeckRow = Pick<
+  Database["public"]["Tables"]["decks"]["Row"],
+  "id" | "locked_at" | "source_type" | "status"
+>;
 
 type LobbyStatusQueryResult =
   | {
@@ -156,10 +162,12 @@ function buildRosterMemberViewModel(
 }
 
 function buildLobbyStatusViewModel({
+  deckSetup,
   game,
   membership,
   rosterMembers
 }: {
+  deckSetup: DeckSetupReadinessInput;
   game: LobbyGameRow;
   membership: Pick<LobbyMembershipRow, "role" | "status">;
   rosterMembers: LobbyRosterMemberViewModel[];
@@ -168,6 +176,7 @@ function buildLobbyStatusViewModel({
   const memberCount = rosterMembers.length;
   const memberCountLabel = getMemberCountLabel(memberCount);
   const setupReadiness = buildLobbySetupReadiness({
+    deckSetup,
     gameStatus: game.status,
     gameStatusLabel: gameStatusLabels[game.status],
     isOwnerAdmin,
@@ -207,6 +216,55 @@ function buildLobbyStatusViewModel({
     },
     setupChecklistItems: setupReadiness.items,
     setupReadinessSummary: setupReadiness.summary
+  };
+}
+
+async function getLobbyDeckSetupReadiness({
+  gameId,
+  supabase
+}: {
+  gameId: string;
+  supabase: LobbyQueryContext["supabase"];
+}): Promise<DeckSetupReadinessInput | null> {
+  const setupHref = `/games/${encodeURIComponent(gameId)}/setup/deck`;
+  const { data: deckData, error: deckError } = await supabase
+    .from("decks")
+    .select("id, source_type, status, locked_at")
+    .eq("game_id", gameId)
+    .maybeSingle();
+
+  if (deckError) {
+    return null;
+  }
+
+  if (!deckData) {
+    return {
+      cardCount: 0,
+      deckId: null,
+      isLocked: false,
+      setupHref,
+      sourceType: null,
+      status: null
+    };
+  }
+
+  const deck = deckData as LobbyDeckRow;
+  const { count, error: cardCountError } = await supabase
+    .from("deck_cards")
+    .select("id", { count: "exact", head: true })
+    .eq("deck_id", deck.id);
+
+  if (cardCountError) {
+    return null;
+  }
+
+  return {
+    cardCount: count ?? 0,
+    deckId: deck.id,
+    isLocked: deck.status === "locked" || Boolean(deck.locked_at),
+    setupHref,
+    sourceType: deck.source_type,
+    status: deck.status
   };
 }
 
@@ -295,8 +353,21 @@ async function getLobbyStatusForCurrentUser(
     };
   }
 
+  const deckSetup = await getLobbyDeckSetupReadiness({
+    gameId,
+    supabase
+  });
+
+  if (!deckSetup) {
+    return {
+      error: "lobby-unavailable",
+      ok: false
+    };
+  }
+
   return {
     lobby: buildLobbyStatusViewModel({
+      deckSetup,
       game,
       membership,
       rosterMembers: [...((rosterData ?? []) as LobbyRosterMembershipRow[])]

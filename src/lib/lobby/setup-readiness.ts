@@ -1,4 +1,5 @@
 import type { LobbyGameStatus } from "../../types/lobby";
+import type { DeckSetupReadinessInput } from "../../types/deck";
 import type {
   SetupChecklistItem,
   SetupReadinessSummary
@@ -10,6 +11,7 @@ type SetupReadinessRosterMember = {
 };
 
 type BuildLobbySetupReadinessInput = {
+  deckSetup: DeckSetupReadinessInput;
   gameStatus: LobbyGameStatus;
   gameStatusLabel: string;
   isOwnerAdmin: boolean;
@@ -22,6 +24,8 @@ type LobbySetupReadiness = {
   items: SetupChecklistItem[];
   summary: SetupReadinessSummary;
 };
+
+const REQUIRED_DECK_CARD_COUNT = 52;
 
 function getDuplicateTurnOrderIndexes(rosterMembers: SetupReadinessRosterMember[]) {
   const seenIndexes = new Set<number>();
@@ -47,7 +51,84 @@ function formatAreaList(areaLabels: string[]) {
   return areaLabels.length ? areaLabels.join(", ") : "None";
 }
 
+function isDeckSetupComplete(deckSetup: DeckSetupReadinessInput) {
+  return (
+    deckSetup.deckId !== null &&
+    deckSetup.cardCount >= REQUIRED_DECK_CARD_COUNT &&
+    (deckSetup.status === "valid" ||
+      (deckSetup.status === "locked" && deckSetup.isLocked))
+  );
+}
+
+function buildDeckSetupChecklistItem({
+  deckSetup,
+  isOwnerAdmin
+}: {
+  deckSetup: DeckSetupReadinessInput;
+  isOwnerAdmin: boolean;
+}): SetupChecklistItem {
+  const cardCountLabel = `${deckSetup.cardCount} / ${REQUIRED_DECK_CARD_COUNT} cards configured`;
+  const actionLabel = isOwnerAdmin ? "Open deck setup" : "View deck setup";
+
+  if (!deckSetup.deckId) {
+    return {
+      actionHref: deckSetup.setupHref,
+      actionLabel,
+      description: "A draft deck has not been created for this game yet.",
+      readinessCategory: "incomplete",
+      requirement: "required",
+      status: "warning",
+      statusLabel: "Missing",
+      title: "Deck/card setup",
+      validationMessages: [
+        "No draft deck exists yet.",
+        cardCountLabel,
+        "No official/proprietary card content is included."
+      ]
+    };
+  }
+
+  if (isDeckSetupComplete(deckSetup)) {
+    return {
+      actionHref: deckSetup.setupHref,
+      actionLabel,
+      description:
+        "Deck setup has a saved status that supports later start validation.",
+      readinessCategory: "complete",
+      requirement: "required",
+      status: "complete",
+      statusLabel: "Complete",
+      title: "Deck/card setup",
+      validationMessages: [
+        cardCountLabel,
+        `Deck status is ${deckSetup.status}.`,
+        "No start-game action is enabled by this checklist."
+      ]
+    };
+  }
+
+  return {
+    actionHref: deckSetup.setupHref,
+    actionLabel,
+    description:
+      "A draft deck exists, but card setup is not ready to start play.",
+    readinessCategory: "incomplete",
+    requirement: "required",
+    status: "warning",
+    statusLabel: "In progress",
+    title: "Deck/card setup",
+    validationMessages: [
+      cardCountLabel,
+      `Deck source is ${deckSetup.sourceType ?? "not set"} and status is ${deckSetup.status ?? "not set"}.`,
+      "Draft deck exists but is not locked or validated.",
+      "Manual entry is coming next; JSON import is later.",
+      "No official/proprietary card content is included."
+    ]
+  };
+}
+
 function buildLobbySetupReadiness({
+  deckSetup,
   gameStatus,
   gameStatusLabel,
   isOwnerAdmin,
@@ -114,20 +195,7 @@ function buildLobbySetupReadiness({
           : ["Saved turn order indexes are unique."])
       ]
     },
-    {
-      actionDisabledReason: "Deck setup is deferred to the dedicated deck phase.",
-      actionLabel: "Coming later",
-      description:
-        "Deck/card setup will use user-provided content in a later slice.",
-      readinessCategory: "future",
-      requirement: "required",
-      status: "incomplete",
-      statusLabel: "Future",
-      title: "Deck/card setup",
-      validationMessages: [
-        "No deck editor, card import, or official/proprietary content is added here."
-      ]
-    },
+    buildDeckSetupChecklistItem({ deckSetup, isOwnerAdmin }),
     {
       actionDisabledReason: "Initial map setup is deferred to the map setup phase.",
       actionLabel: "Coming later",
@@ -195,15 +263,15 @@ function buildLobbySetupReadiness({
       readyAreaLabels,
       readyCount: readyAreaLabels.length,
       roleDescription: isOwnerAdmin
-        ? `You can currently invite players and adjust turn order. Future setup remains unavailable: ${formatAreaList(futureAreaLabels)}.`
-        : "Setup status is read-only for your role. Owner/admin members control invites and turn order, and future setup remains unavailable.",
+        ? `You can currently invite players, adjust turn order, and open deck setup. Future setup remains unavailable: ${formatAreaList(futureAreaLabels)}.`
+        : "Setup status is read-only for your role. Owner/admin members control invites, turn order, and deck setup changes. Future setup remains unavailable.",
       summaryLabel: `${readyAreaLabels.length} of ${items.length} setup areas ready`,
       totalCount: items.length
     }
   };
 }
 
-export { buildLobbySetupReadiness };
+export { REQUIRED_DECK_CARD_COUNT, buildLobbySetupReadiness };
 export type {
   BuildLobbySetupReadinessInput,
   LobbySetupReadiness,

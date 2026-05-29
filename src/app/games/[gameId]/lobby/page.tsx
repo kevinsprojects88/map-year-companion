@@ -82,9 +82,10 @@ export default async function GameLobbyPage({
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
               This private lobby now reports setup readiness from active member
-              count and saved turn order. Owner/admin controls stay limited to
-              invite creation and turn-order editing; deck, map, notes, and
-              start-game actions remain disabled for later slices.
+              count, saved turn order, and deck setup status. Owner/admin
+              controls stay limited to invite creation, turn-order editing, and
+              draft deck initialization; map, notes, and start-game actions
+              remain disabled for later slices.
             </p>
           </div>
         </section>
@@ -185,9 +186,10 @@ export default async function GameLobbyPage({
               </h2>
               <p>
                 The lobby reads the game, your active membership, and active
-                member roster, including saved turn order. Owner/admin
-                turn-order edits update only member order. It does not read
-                invite lists, deck records, map records, notes,
+                member roster, including saved turn order. It also reads the
+                game deck shell and card count for setup readiness. Owner/admin
+                controls update only member order or initialize the draft deck.
+                It does not read invite lists, map records, notes,
                 player-management records, or private proof-of-concept content.
               </p>
             </div>

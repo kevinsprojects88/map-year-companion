@@ -132,8 +132,8 @@ function LobbySetupStatus({ items, summary }: LobbySetupStatusProps) {
         </h2>
         <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
           These cards report real lobby readiness where data exists and mark
-          future setup areas without enabling deck, map, player-management,
-          notes, or start-game behavior.
+          future setup areas without enabling map, player-management, notes, or
+          start-game behavior.
         </p>
       </div>
 
