@@ -1,5 +1,9 @@
 import type { Database } from "@/lib/supabase/types";
 import type {
+  UpsertDeckCardFieldErrors,
+  UpsertDeckCardValues
+} from "@/lib/validation/deck-card.schema";
+import type {
   CreateDraftDeckFieldErrors,
   CreateDraftDeckValues
 } from "@/lib/validation/deck.schema";
@@ -13,10 +17,25 @@ type DeckMembershipRole = Database["public"]["Enums"]["game_member_role"];
 type DeckSetupReadinessInput = {
   cardCount: number;
   deckId: string | null;
+  promptTextCount?: number;
   isLocked: boolean;
   setupHref: string;
   sourceType: DeckSourceType | null;
   status: DeckStatus | null;
+};
+
+type DeckCardViewModel = {
+  cardKey: string;
+  createdLabel: string;
+  hasPromptText: boolean;
+  id: string;
+  promptText: string | null;
+  promptTextStatusLabel: string;
+  season: string | null;
+  seasonLabel: string;
+  updatedLabel: string;
+  weekNumber: number;
+  weekNumberLabel: string;
 };
 
 type DeckSetupViewModel = {
@@ -24,7 +43,10 @@ type DeckSetupViewModel = {
     cardCount: number;
     cardCountLabel: string;
     configuredCountLabel: string;
+    promptTextCount: number;
+    promptTextCountLabel: string;
   };
+  cards: DeckCardViewModel[];
   deck: {
     createdLabel: string;
     id: string;
@@ -63,12 +85,22 @@ type CreateDraftDeckActionState = {
   values: CreateDraftDeckValues;
 };
 
+type UpsertDeckCardActionState = {
+  fieldErrors: UpsertDeckCardFieldErrors;
+  formError: string | null;
+  status: "idle" | "error" | "success";
+  successMessage: string | null;
+  values: UpsertDeckCardValues;
+};
+
 export type {
   CreateDraftDeckActionState,
+  DeckCardViewModel,
   DeckGameStatus,
   DeckMembershipRole,
   DeckSetupReadinessInput,
   DeckSetupViewModel,
   DeckSourceType,
-  DeckStatus
+  DeckStatus,
+  UpsertDeckCardActionState
 };

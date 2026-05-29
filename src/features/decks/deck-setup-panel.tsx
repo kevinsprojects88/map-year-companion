@@ -14,6 +14,8 @@ import { REQUIRED_DECK_CARD_COUNT } from "@/lib/lobby/setup-readiness";
 import type { DeckSetupViewModel } from "@/types/deck";
 
 import { CreateDraftDeckForm } from "./create-draft-deck-form";
+import { DeckCardList } from "./deck-card-list";
+import { ManualCardEntryForm } from "./manual-card-entry-form";
 
 type DeckSetupPanelProps = {
   deckSetup: DeckSetupViewModel;
@@ -37,6 +39,12 @@ function getSetupBadgeVariant(
 function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
   const setupBadgeVariant = getSetupBadgeVariant(
     deckSetup.setup.readinessCategory
+  );
+  const canEditCards = Boolean(
+    deckSetup.deck &&
+      deckSetup.membership.isOwnerAdmin &&
+      deckSetup.deck.status === "draft" &&
+      deckSetup.game.status === "setup"
   );
 
   return (
@@ -65,6 +73,9 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
             <p className="text-muted-foreground">
               Deck/card content is game-specific and user-provided.
             </p>
+            <p className="text-muted-foreground">
+              No official/proprietary card content is included or generated.
+            </p>
           </CardContent>
         </Card>
 
@@ -82,6 +93,9 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
             <p className="text-muted-foreground">
               {deckSetup.cardSetup.cardCountLabel}
             </p>
+            <p className="text-muted-foreground">
+              {deckSetup.cardSetup.promptTextCountLabel}
+            </p>
           </CardContent>
         </Card>
 
@@ -97,8 +111,8 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
               No official/proprietary card content is included.
             </p>
             <p className="text-muted-foreground">
-              JSON import, card text entry, card art, and validation are not
-              part of this slice.
+              JSON import, card art, deck locking, and start-game validation
+              are not part of this slice.
             </p>
           </CardContent>
         </Card>
@@ -148,8 +162,9 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
             </dl>
           </CardContent>
           <CardFooter>
-            Manual card entry is coming next. This page does not lock the deck,
-            validate the full set, or start the game.
+            Minimal manual card entry is available while the deck stays draft.
+            This page does not lock the deck, validate the full set, or start
+            the game.
           </CardFooter>
         </Card>
       ) : deckSetup.setup.canCreateDraftDeck ? (
@@ -170,24 +185,67 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
 
       <Card variant="raised">
         <CardHeader>
-          <CardTitle>Manual setup structure</CardTitle>
+          <CardTitle>Saved cards</CardTitle>
           <CardDescription>
-            Placeholder-only structure for the next deck/card slice.
+            Existing card rows for this game&apos;s deck, sorted by week and
+            card key.
           </CardDescription>
+          <CardAction>
+            <Badge variant="outline">
+              {deckSetup.cardSetup.cardCount} / {REQUIRED_DECK_CARD_COUNT}
+            </Badge>
+          </CardAction>
         </CardHeader>
         <CardContent>
-          <ul className="grid gap-2 text-sm leading-6 text-muted-foreground">
-            <li>- {deckSetup.cardSetup.configuredCountLabel}</li>
-            <li>- Manual card entry is coming next.</li>
-            <li>- JSON import is coming later.</li>
-            <li>- No official/proprietary card text is included.</li>
-          </ul>
+          <DeckCardList cards={deckSetup.cards} />
         </CardContent>
         <CardFooter>
           This is not a full 52-card editor, import flow, deck lock, or
           start-game validation engine.
         </CardFooter>
       </Card>
+
+      {deckSetup.deck && canEditCards ? (
+        <Card variant="draft">
+          <CardHeader>
+            <div className="col-start-1 flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="draft">Owner/admin</Badge>
+                <Badge variant="attention">Draft deck</Badge>
+              </div>
+              <CardTitle>Manual card entry</CardTitle>
+              <CardDescription>
+                Add or update one user-provided placeholder card at a time.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ManualCardEntryForm gameId={deckSetup.game.id} />
+          </CardContent>
+          <CardFooter>
+            Saving the same week number updates that week&apos;s card row. The
+            server chooses the deck from the game id and does not accept deck
+            id, status, timestamps, ownership fields, or metadata from the
+            form.
+          </CardFooter>
+        </Card>
+      ) : deckSetup.deck ? (
+        <PermissionAlert
+          allowedActions={[
+            "View deck status.",
+            "Read existing user-provided card rows.",
+            "Return to the lobby setup checklist."
+          ]}
+          description={
+            deckSetup.membership.isOwnerAdmin
+              ? "Card editing is disabled unless the game is in setup and the deck is draft."
+              : "Active player members can view deck/card setup, but only owner/admin members can add or update cards while the deck is draft."
+          }
+          disabledReason="No card entry controls are available for this role or deck state."
+          roleContext={deckSetup.membership.roleLabel}
+          title="Deck setup is read-only"
+        />
+      ) : null}
     </section>
   );
 }

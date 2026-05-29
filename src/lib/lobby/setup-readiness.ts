@@ -55,6 +55,7 @@ function isDeckSetupComplete(deckSetup: DeckSetupReadinessInput) {
   return (
     deckSetup.deckId !== null &&
     deckSetup.cardCount >= REQUIRED_DECK_CARD_COUNT &&
+    (deckSetup.promptTextCount ?? 0) >= REQUIRED_DECK_CARD_COUNT &&
     (deckSetup.status === "valid" ||
       (deckSetup.status === "locked" && deckSetup.isLocked))
   );
@@ -68,6 +69,8 @@ function buildDeckSetupChecklistItem({
   isOwnerAdmin: boolean;
 }): SetupChecklistItem {
   const cardCountLabel = `${deckSetup.cardCount} / ${REQUIRED_DECK_CARD_COUNT} cards configured`;
+  const promptTextCount = deckSetup.promptTextCount ?? 0;
+  const promptTextCountLabel = `${promptTextCount} / ${REQUIRED_DECK_CARD_COUNT} cards have prompt text`;
   const actionLabel = isOwnerAdmin ? "Open deck setup" : "View deck setup";
 
   if (!deckSetup.deckId) {
@@ -83,6 +86,7 @@ function buildDeckSetupChecklistItem({
       validationMessages: [
         "No draft deck exists yet.",
         cardCountLabel,
+        promptTextCountLabel,
         "No official/proprietary card content is included."
       ]
     };
@@ -101,6 +105,7 @@ function buildDeckSetupChecklistItem({
       title: "Deck/card setup",
       validationMessages: [
         cardCountLabel,
+        promptTextCountLabel,
         `Deck status is ${deckSetup.status}.`,
         "No start-game action is enabled by this checklist."
       ]
@@ -119,9 +124,10 @@ function buildDeckSetupChecklistItem({
     title: "Deck/card setup",
     validationMessages: [
       cardCountLabel,
+      promptTextCountLabel,
       `Deck source is ${deckSetup.sourceType ?? "not set"} and status is ${deckSetup.status ?? "not set"}.`,
       "Draft deck exists but is not locked or validated.",
-      "Manual entry is coming next; JSON import is later.",
+      "Manual entry is minimal; JSON import is later.",
       "No official/proprietary card content is included."
     ]
   };

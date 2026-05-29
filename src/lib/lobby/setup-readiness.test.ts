@@ -11,6 +11,7 @@ const orderedTwoMemberInput = {
   deckSetup: {
     cardCount: 0,
     deckId: null,
+    promptTextCount: 0,
     isLocked: false,
     setupHref: "/games/c54887e2-6ee1-46a2-9861-7a5894d697db/setup/deck",
     sourceType: null,
@@ -169,6 +170,7 @@ test("marks a draft deck as in progress until it has meaningful validation", () 
       ...orderedTwoMemberInput.deckSetup,
       cardCount: 0,
       deckId: "11111111-1111-4111-8111-111111111111",
+      promptTextCount: 0,
       sourceType: "placeholder",
       status: "draft"
     }
@@ -194,6 +196,7 @@ test("marks a valid full deck complete when the saved status supports it", () =>
       cardCount: 52,
       deckId: "11111111-1111-4111-8111-111111111111",
       isLocked: true,
+      promptTextCount: 52,
       sourceType: "manual",
       status: "locked"
     }
@@ -210,6 +213,31 @@ test("marks a valid full deck complete when the saved status supports it", () =>
     "Turn order",
     "Deck/card setup"
   ]);
+});
+
+test("keeps a full deck incomplete until all saved cards have prompt text", () => {
+  const readiness = buildLobbySetupReadiness({
+    ...orderedTwoMemberInput,
+    deckSetup: {
+      ...orderedTwoMemberInput.deckSetup,
+      cardCount: 52,
+      deckId: "11111111-1111-4111-8111-111111111111",
+      isLocked: true,
+      promptTextCount: 51,
+      sourceType: "manual",
+      status: "locked"
+    }
+  });
+  const deckItem = readiness.items.find(
+    (item) => item.title === "Deck/card setup"
+  );
+
+  assert.equal(deckItem?.status, "warning");
+  assert.equal(deckItem?.readinessCategory, "incomplete");
+  assert.match(
+    deckItem?.validationMessages?.join(" ") ?? "",
+    /51 \/ 52 cards have prompt text/i
+  );
 });
 
 test("uses distinct setup copy for owner/admin and player members", () => {

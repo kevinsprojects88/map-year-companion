@@ -3,7 +3,7 @@ import "server-only";
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
 import { REQUIRED_DECK_CARD_COUNT } from "@/lib/lobby/setup-readiness";
 import type { Database } from "@/lib/supabase/types";
-import type { DeckSetupViewModel } from "@/types/deck";
+import type { DeckCardViewModel, DeckSetupViewModel } from "@/types/deck";
 
 type DeckGameStatus = Database["public"]["Enums"]["game_status"];
 type DeckMemberRole = Database["public"]["Enums"]["game_member_role"];
@@ -35,6 +35,17 @@ type DeckRow = Pick<
   | "source_type"
   | "status"
   | "updated_at"
+>;
+
+type DeckCardRow = Pick<
+  Database["public"]["Tables"]["deck_cards"]["Row"],
+  | "card_key"
+  | "created_at"
+  | "id"
+  | "prompt_text"
+  | "season"
+  | "updated_at"
+  | "week_number"
 >;
 
 type DeckSetupQueryResult =
@@ -106,35 +117,72 @@ function getConfiguredCountLabel(cardCount: number) {
   return `${cardCount} / ${REQUIRED_DECK_CARD_COUNT} cards configured`;
 }
 
-function isDeckMeaningfullyComplete(deck: DeckRow, cardCount: number) {
+function getPromptTextCountLabel(promptTextCount: number) {
+  return `${promptTextCount} / ${REQUIRED_DECK_CARD_COUNT} cards have prompt text`;
+}
+
+function hasPromptText(card: Pick<DeckCardRow, "prompt_text">) {
+  return Boolean(card.prompt_text?.trim());
+}
+
+function isDeckMeaningfullyComplete(deck: DeckRow, cards: DeckCardRow[]) {
+  const promptTextCount = cards.filter(hasPromptText).length;
+
   return (
-    cardCount >= REQUIRED_DECK_CARD_COUNT &&
+    cards.length >= REQUIRED_DECK_CARD_COUNT &&
+    promptTextCount >= REQUIRED_DECK_CARD_COUNT &&
     (deck.status === "valid" ||
       deck.status === "locked" ||
       Boolean(deck.locked_at))
   );
 }
 
+function buildDeckCardViewModel(card: DeckCardRow): DeckCardViewModel {
+  const cardHasPromptText = hasPromptText(card);
+
+  return {
+    cardKey: card.card_key,
+    createdLabel: formatDateLabel("Created", card.created_at),
+    hasPromptText: cardHasPromptText,
+    id: card.id,
+    promptText: card.prompt_text,
+    promptTextStatusLabel: cardHasPromptText
+      ? "Prompt text saved"
+      : "No prompt text",
+    season: card.season,
+    seasonLabel: card.season?.trim() || "No season saved",
+    updatedLabel: formatDateLabel("Updated", card.updated_at),
+    weekNumber: card.week_number,
+    weekNumberLabel: `Week ${card.week_number}`
+  };
+}
+
 function buildDeckSetupViewModel({
-  cardCount,
+  cards,
   deck,
   game,
   membership
 }: {
-  cardCount: number;
+  cards: DeckCardRow[];
   deck: DeckRow | null;
   game: DeckGameRow;
   membership: Pick<DeckMembershipRow, "role">;
 }): DeckSetupViewModel {
   const userIsOwnerAdmin = isOwnerAdmin(membership.role);
+  const cardCount = cards.length;
+  const promptTextCount = cards.filter(hasPromptText).length;
+  const cardSetup = {
+    cardCount,
+    cardCountLabel: getCardCountLabel(cardCount),
+    configuredCountLabel: getConfiguredCountLabel(cardCount),
+    promptTextCount,
+    promptTextCountLabel: getPromptTextCountLabel(promptTextCount)
+  };
 
   if (!deck) {
     return {
-      cardSetup: {
-        cardCount,
-        cardCountLabel: getCardCountLabel(cardCount),
-        configuredCountLabel: getConfiguredCountLabel(cardCount)
-      },
+      cardSetup,
+      cards: [],
       deck: null,
       game: {
         id: game.id,
@@ -158,15 +206,12 @@ function buildDeckSetupViewModel({
     };
   }
 
-  const complete = isDeckMeaningfullyComplete(deck, cardCount);
+  const complete = isDeckMeaningfullyComplete(deck, cards);
   const isLocked = deck.status === "locked" || Boolean(deck.locked_at);
 
   return {
-    cardSetup: {
-      cardCount,
-      cardCountLabel: getCardCountLabel(cardCount),
-      configuredCountLabel: getConfiguredCountLabel(cardCount)
-    },
+    cardSetup,
+    cards: cards.map(buildDeckCardViewModel),
     deck: {
       createdLabel: formatDateLabel("Created", deck.created_at),
       id: deck.id,
@@ -193,7 +238,7 @@ function buildDeckSetupViewModel({
       canCreateDraftDeck: false,
       description: complete
         ? "Deck setup has a saved status that can support later start validation."
-        : "A draft deck exists. Manual card entry and validation are still deferred.",
+        : "A draft deck exists. Manual card entry is available to owner/admin members while validation remains conservative.",
       readinessCategory: complete ? "complete" : "incomplete",
       statusLabel: complete ? "Complete" : "In progress"
     }
@@ -269,27 +314,31 @@ async function getDeckSetupForCurrentUser(
   }
 
   const deck = deckData as DeckRow | null;
-  let cardCount = 0;
+  let cards: DeckCardRow[] = [];
 
   if (deck) {
-    const { count, error: countError } = await supabase
+    const { data: cardData, error: cardError } = await supabase
       .from("deck_cards")
-      .select("id", { count: "exact", head: true })
-      .eq("deck_id", deck.id);
+      .select(
+        "id, card_key, season, week_number, prompt_text, created_at, updated_at"
+      )
+      .eq("deck_id", deck.id)
+      .order("week_number", { ascending: true })
+      .order("card_key", { ascending: true });
 
-    if (countError) {
+    if (cardError) {
       return {
         error: "deck-setup-unavailable",
         ok: false
       };
     }
 
-    cardCount = count ?? 0;
+    cards = (cardData ?? []) as DeckCardRow[];
   }
 
   return {
     deckSetup: buildDeckSetupViewModel({
-      cardCount,
+      cards,
       deck,
       game,
       membership

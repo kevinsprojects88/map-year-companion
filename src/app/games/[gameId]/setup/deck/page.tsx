@@ -66,7 +66,7 @@ export default async function GameDeckSetupPage({
           </Link>
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Phase 6A</Badge>
+              <Badge variant="secondary">Phase 6B</Badge>
               <Badge variant="outline">Member-scoped deck setup</Badge>
               <Badge variant="waiting">{deckSetup.game.statusLabel}</Badge>
             </div>
@@ -74,10 +74,10 @@ export default async function GameDeckSetupPage({
               {deckSetup.game.name}
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-              Deck/card setup starts here with a game-specific draft deck shell,
-              basic status, and placeholder manual-entry structure. This route
-              does not include official card content, import files, deck
-              locking, validation, or start-game behavior.
+              Deck/card setup now supports a small manual-entry foundation for
+              user-provided placeholder cards. This route does not include
+              official card content, import files, deck locking, full
+              validation, or start-game behavior.
             </p>
           </div>
         </section>
