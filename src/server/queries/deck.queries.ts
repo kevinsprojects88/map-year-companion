@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
+import { buildDeckLockPreflight } from "@/lib/decks/deck-lock-preflight";
 import {
   REQUIRED_DECK_WEEK_COUNT,
   calculateDeckCoverage,
@@ -218,6 +219,14 @@ function buildDeckSetupViewModel({
         }
       : null
   });
+  const lockPreflight = buildDeckLockPreflight({
+    deck: deck
+      ? {
+          status: deck.status
+        }
+      : null,
+    validation
+  });
   const cardCount = coverage.configuredCardCount;
   const promptTextCount = coverage.promptFilledCount;
   const cardSetup = {
@@ -259,6 +268,7 @@ function buildDeckSetupViewModel({
         role: membership.role,
         roleLabel: memberRoleLabels[membership.role]
       },
+      lockPreflight,
       validation,
       setup: {
         canCreateDraftDeck: userIsOwnerAdmin && game.status === "setup",
@@ -303,6 +313,7 @@ function buildDeckSetupViewModel({
       role: membership.role,
       roleLabel: memberRoleLabels[membership.role]
     },
+    lockPreflight,
     validation,
     setup: {
       canCreateDraftDeck: false,

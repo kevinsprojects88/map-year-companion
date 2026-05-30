@@ -16,6 +16,7 @@ import type { DeckSetupViewModel } from "@/types/deck";
 import { CreateDraftDeckForm } from "./create-draft-deck-form";
 import { DeckCoverageSummary } from "./deck-coverage-summary";
 import { DeckCardList } from "./deck-card-list";
+import { DeckLockPreflightPanel } from "./deck-lock-preflight-panel";
 import { DeckValidationSummary } from "./deck-validation-summary";
 import { ManualCardEntryForm } from "./manual-card-entry-form";
 
@@ -126,6 +127,8 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
       <DeckCoverageSummary deckSetup={deckSetup} />
 
       <DeckValidationSummary deckSetup={deckSetup} />
+
+      <DeckLockPreflightPanel deckSetup={deckSetup} />
 
       {deckSetup.deck ? (
         <Card variant="draft">

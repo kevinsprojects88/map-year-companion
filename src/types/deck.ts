@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/types";
+import type { DeckLockPreflightResult } from "@/lib/decks/deck-lock-preflight";
 import type { DeckValidationResult } from "@/lib/decks/deck-validation";
 import type {
   UpsertDeckCardFieldErrors,
@@ -91,6 +92,7 @@ type DeckSetupViewModel = {
     role: DeckMembershipRole;
     roleLabel: string;
   };
+  lockPreflight: DeckLockPreflightResult;
   validation: DeckValidationResult;
   setup: {
     canCreateDraftDeck: boolean;
