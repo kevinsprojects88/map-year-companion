@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/types";
+import type { DeckValidationResult } from "@/lib/decks/deck-validation";
 import type {
   UpsertDeckCardFieldErrors,
   UpsertDeckCardValues
@@ -30,6 +31,7 @@ type DeckSetupReadinessInput = {
   sourceType: DeckSourceType | null;
   status: DeckStatus | null;
   uniqueWeekCount?: number;
+  validation?: DeckValidationResult;
 };
 
 type DeckCardViewModel = {
@@ -89,6 +91,7 @@ type DeckSetupViewModel = {
     role: DeckMembershipRole;
     roleLabel: string;
   };
+  validation: DeckValidationResult;
   setup: {
     canCreateDraftDeck: boolean;
     description: string;

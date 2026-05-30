@@ -16,6 +16,7 @@ import type { DeckSetupViewModel } from "@/types/deck";
 import { CreateDraftDeckForm } from "./create-draft-deck-form";
 import { DeckCoverageSummary } from "./deck-coverage-summary";
 import { DeckCardList } from "./deck-card-list";
+import { DeckValidationSummary } from "./deck-validation-summary";
 import { ManualCardEntryForm } from "./manual-card-entry-form";
 
 type DeckSetupPanelProps = {
@@ -124,6 +125,8 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
 
       <DeckCoverageSummary deckSetup={deckSetup} />
 
+      <DeckValidationSummary deckSetup={deckSetup} />
+
       {deckSetup.deck ? (
         <Card variant="draft">
           <CardHeader className="gap-y-3">
@@ -169,8 +172,8 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
           </CardContent>
           <CardFooter>
             Minimal manual card entry is available while the deck stays draft.
-            This page does not lock the deck, validate the full set, or start
-            the game.
+            This page reports read-only validation, but does not lock the deck
+            or start the game.
           </CardFooter>
         </Card>
       ) : deckSetup.setup.canCreateDraftDeck ? (
@@ -207,7 +210,7 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
         </CardContent>
         <CardFooter>
           This is not a full 52-card editor, import flow, deck lock, or
-          start-game validation engine.
+          start-game engine.
         </CardFooter>
       </Card>
 

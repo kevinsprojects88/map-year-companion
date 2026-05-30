@@ -225,6 +225,71 @@ test("reports partial draft deck coverage by represented weeks", () => {
   );
 });
 
+test("uses deck validation issue messages in deck setup readiness copy", () => {
+  const readiness = buildLobbySetupReadiness({
+    ...orderedTwoMemberInput,
+    deckSetup: {
+      ...orderedTwoMemberInput.deckSetup,
+      allConfiguredCardsHavePromptText: true,
+      allWeeksRepresented: false,
+      blankPromptCount: 0,
+      cardCount: 1,
+      deckId: "11111111-1111-4111-8111-111111111111",
+      duplicateWeekNumbers: [],
+      hasDuplicateWeekNumbers: false,
+      missingWeekCount: 51,
+      missingWeekPreviewLabel: "2, 3, 4, 5, 6, 7, 8, 9, 10... +42 more",
+      promptTextCount: 1,
+      sourceType: "manual",
+      status: "draft",
+      uniqueWeekCount: 1,
+      validation: {
+        blankPromptWeekNumbers: [],
+        blockingIssues: [
+          {
+            code: "missing-weeks",
+            message: "51 weeks missing: 2, 3, 4, 5, 6, 7, 8, 9, 10... +42 more.",
+            weekNumbers: Array.from({ length: 51 }, (_, index) => index + 2)
+          }
+        ],
+        duplicateWeekNumbers: [],
+        isPromptComplete: false,
+        isReadyForLocking: false,
+        isStructurallyComplete: false,
+        missingWeekNumbers: Array.from({ length: 51 }, (_, index) => index + 2),
+        summary: {
+          blankPromptCount: 0,
+          missingWeekCount: 51,
+          promptFilledCount: 1,
+          representedWeeks: 1
+        },
+        warnings: [
+          {
+            code: "locking-not-built",
+            message: "Deck locking is not built yet."
+          },
+          {
+            code: "start-game-not-built",
+            message: "Start-game behavior is not built yet."
+          }
+        ]
+      }
+    }
+  });
+  const deckItem = readiness.items.find(
+    (item) => item.title === "Deck/card setup"
+  );
+
+  assert.match(
+    deckItem?.validationMessages?.join(" ") ?? "",
+    /51 weeks missing: 2, 3, 4, 5, 6, 7, 8, 9, 10\.\.\. \+42 more\./i
+  );
+  assert.match(
+    deckItem?.validationMessages?.join(" ") ?? "",
+    /Start-game behavior is not built yet\./i
+  );
+});
+
 test("keeps a full prompted draft deck prepared but not complete", () => {
   const readiness = buildLobbySetupReadiness({
     ...orderedTwoMemberInput,
@@ -254,7 +319,7 @@ test("keeps a full prompted draft deck prepared but not complete", () => {
   assert.equal(deckItem?.readinessCategory, "incomplete");
   assert.match(
     deckItem?.validationMessages?.join(" ") ?? "",
-    /All 52 weeks are represented, but deck locking is not built yet/i
+    /Deck appears ready for future locking, but locking is not built yet/i
   );
 });
 

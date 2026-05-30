@@ -6,6 +6,7 @@ import {
   calculateDeckCoverage,
   type DeckCoverageSummary
 } from "@/lib/decks/deck-coverage";
+import { validateDeckReadiness } from "@/lib/decks/deck-validation";
 import type { Database } from "@/lib/supabase/types";
 import type { DeckCardViewModel, DeckSetupViewModel } from "@/types/deck";
 
@@ -205,6 +206,18 @@ function buildDeckSetupViewModel({
 }): DeckSetupViewModel {
   const userIsOwnerAdmin = isOwnerAdmin(membership.role);
   const coverage = getDeckCoverage(cards);
+  const validationCards = cards.map((card) => ({
+    promptText: card.prompt_text,
+    weekNumber: card.week_number
+  }));
+  const validation = validateDeckReadiness({
+    cards: validationCards,
+    deck: deck
+      ? {
+          status: deck.status
+        }
+      : null
+  });
   const cardCount = coverage.configuredCardCount;
   const promptTextCount = coverage.promptFilledCount;
   const cardSetup = {
@@ -246,10 +259,11 @@ function buildDeckSetupViewModel({
         role: membership.role,
         roleLabel: memberRoleLabels[membership.role]
       },
+      validation,
       setup: {
         canCreateDraftDeck: userIsOwnerAdmin && game.status === "setup",
         description: userIsOwnerAdmin
-          ? "Create a placeholder draft deck record before manual card entry arrives."
+          ? "Create a placeholder draft deck record before manual card entry."
           : "Owner/admin members can create the draft deck. You can view setup status.",
         readinessCategory: "incomplete",
         statusLabel: "Missing"
@@ -261,9 +275,8 @@ function buildDeckSetupViewModel({
   const isLocked = deck.status === "locked" || Boolean(deck.locked_at);
   const preparedDraft =
     deck.status === "draft" &&
-    coverage.allWeeksRepresented &&
-    coverage.allConfiguredCardsHavePromptText &&
-    !coverage.hasDuplicateWeekNumbers;
+    validation.isReadyForLocking &&
+    !deck.locked_at;
 
   return {
     cardSetup,
@@ -290,13 +303,14 @@ function buildDeckSetupViewModel({
       role: membership.role,
       roleLabel: memberRoleLabels[membership.role]
     },
+    validation,
     setup: {
       canCreateDraftDeck: false,
       description: complete
-        ? "Deck setup has a saved status that can support later start validation."
+        ? "Deck setup has saved valid or locked status and passes read-only validation."
         : preparedDraft
-          ? "All 52 weeks are represented, but deck locking is not built yet."
-          : "A draft deck exists. Manual card entry is available to owner/admin members while validation remains conservative.",
+          ? "Deck appears ready for future locking, but locking is not built yet."
+          : "Read-only validation shows what needs attention before future deck locking.",
       readinessCategory: complete ? "complete" : "incomplete",
       statusLabel: complete
         ? "Complete"

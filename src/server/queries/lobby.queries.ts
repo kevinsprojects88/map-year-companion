@@ -2,6 +2,7 @@ import "server-only";
 
 import type { AuthenticatedProfileContext } from "@/lib/auth/require-profile";
 import { calculateDeckCoverage } from "@/lib/decks/deck-coverage";
+import { validateDeckReadiness } from "@/lib/decks/deck-validation";
 import { buildLobbySetupReadiness } from "@/lib/lobby/setup-readiness";
 import type { Database } from "@/lib/supabase/types";
 import type { DeckSetupReadinessInput } from "@/types/deck";
@@ -244,6 +245,10 @@ async function getLobbyDeckSetupReadiness({
   }
 
   const emptyCoverage = calculateDeckCoverage([]);
+  const emptyValidation = validateDeckReadiness({
+    cards: [],
+    deck: null
+  });
 
   if (!deckData) {
     return {
@@ -262,7 +267,8 @@ async function getLobbyDeckSetupReadiness({
       setupHref,
       sourceType: null,
       status: null,
-      uniqueWeekCount: emptyCoverage.uniqueWeekCount
+      uniqueWeekCount: emptyCoverage.uniqueWeekCount,
+      validation: emptyValidation
     };
   }
 
@@ -276,12 +282,19 @@ async function getLobbyDeckSetupReadiness({
     return null;
   }
 
-  const coverage = calculateDeckCoverage(
-    ((cardData ?? []) as LobbyDeckCardCoverageRow[]).map((card) => ({
+  const deckCards = ((cardData ?? []) as LobbyDeckCardCoverageRow[]).map(
+    (card) => ({
       promptText: card.prompt_text,
       weekNumber: card.week_number
-    }))
+    })
   );
+  const coverage = calculateDeckCoverage(deckCards);
+  const validation = validateDeckReadiness({
+    cards: deckCards,
+    deck: {
+      status: deck.status
+    }
+  });
 
   return {
     allConfiguredCardsHavePromptText:
@@ -299,7 +312,8 @@ async function getLobbyDeckSetupReadiness({
     setupHref,
     sourceType: deck.source_type,
     status: deck.status,
-    uniqueWeekCount: coverage.uniqueWeekCount
+    uniqueWeekCount: coverage.uniqueWeekCount,
+    validation
   };
 }
 

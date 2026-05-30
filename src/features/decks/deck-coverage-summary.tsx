@@ -42,7 +42,7 @@ function getCoverageStatusMessage(deckSetup: DeckSetupViewModel) {
     return "All 52 weeks are represented, but deck locking is not built yet.";
   }
 
-  return "Deck remains draft. Locking and validation are not built yet.";
+  return "Deck remains draft. Validation is read-only and locking is not built yet.";
 }
 
 function getRoleStatusMessage(deckSetup: DeckSetupViewModel) {
