@@ -66,7 +66,7 @@ export default async function GameDeckSetupPage({
           </Link>
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Phase 6E</Badge>
+              <Badge variant="secondary">Phase 6F</Badge>
               <Badge variant="outline">Member-scoped deck setup</Badge>
               <Badge variant="waiting">{deckSetup.game.statusLabel}</Badge>
             </div>
@@ -75,10 +75,10 @@ export default async function GameDeckSetupPage({
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
               Deck/card setup now shows conservative read-only validation and
-              server-side lock preflight for user-provided placeholder cards.
+              a server-side lock action for user-provided placeholder cards.
               Manual entry remains one card at a time; this route does not
-              include official card content, import files, deck locking, or
-              start-game behavior.
+              include official card content, import files, or start-game
+              behavior.
             </p>
           </div>
         </section>

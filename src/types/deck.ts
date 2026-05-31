@@ -6,6 +6,10 @@ import type {
   UpsertDeckCardValues
 } from "@/lib/validation/deck-card.schema";
 import type {
+  LockDeckFieldErrors,
+  LockDeckValues
+} from "@/lib/validation/deck-lock.schema";
+import type {
   CreateDraftDeckFieldErrors,
   CreateDraftDeckValues
 } from "@/lib/validation/deck.schema";
@@ -74,6 +78,7 @@ type DeckSetupViewModel = {
     createdLabel: string;
     id: string;
     isLocked: boolean;
+    lockedAtLabel: string | null;
     lockedLabel: string;
     sourceType: DeckSourceType;
     sourceTypeLabel: string;
@@ -118,6 +123,14 @@ type UpsertDeckCardActionState = {
   values: UpsertDeckCardValues;
 };
 
+type LockDeckActionState = {
+  fieldErrors: LockDeckFieldErrors;
+  formError: string | null;
+  status: "idle" | "error" | "success";
+  successMessage: string | null;
+  values: LockDeckValues;
+};
+
 export type {
   CreateDraftDeckActionState,
   DeckCardViewModel,
@@ -127,5 +140,6 @@ export type {
   DeckSetupViewModel,
   DeckSourceType,
   DeckStatus,
+  LockDeckActionState,
   UpsertDeckCardActionState
 };

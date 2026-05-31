@@ -105,7 +105,7 @@ test("blocks lock preflight until all represented weeks have prompt text", () =>
   assert.equal(preflight.summary.blankPromptCount, 1);
 });
 
-test("marks a complete draft deck eligible for future locking only", () => {
+test("marks a complete draft deck eligible for locking", () => {
   const deck = {
     status: "draft"
   };
@@ -128,11 +128,11 @@ test("marks a complete draft deck eligible for future locking only", () => {
   });
   assert.match(
     preflight.warnings.map((warning) => warning.message).join(" "),
-    /locking is not built yet/i
+    /locking re-runs validation at mutation time/i
   );
 });
 
-test("handles non-draft deck status safely without allowing a future lock", () => {
+test("handles non-draft deck status safely without allowing a lock", () => {
   const deck = {
     status: "valid"
   };

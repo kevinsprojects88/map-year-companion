@@ -12,20 +12,28 @@ import {
 import { REQUIRED_DECK_WEEK_COUNT } from "@/lib/decks/deck-validation";
 import type { DeckSetupViewModel } from "@/types/deck";
 
+import { LockDeckForm } from "./lock-deck-form";
+
 type DeckLockPreflightPanelProps = {
   deckSetup: DeckSetupViewModel;
 };
 
 function getPreflightStatusLabel(deckSetup: DeckSetupViewModel) {
   if (!deckSetup.deck) {
-    return "Deck is missing, so future locking is blocked.";
+    return "Deck is missing, so locking is blocked.";
+  }
+
+  if (deckSetup.deck.isLocked) {
+    return "Deck is locked. Manual card editing is closed.";
   }
 
   if (deckSetup.lockPreflight.canLock) {
-    return "Deck is eligible for a future lock action.";
+    return deckSetup.membership.isOwnerAdmin
+      ? "Deck can be locked now."
+      : "Deck is ready for owner/admin locking.";
   }
 
-  return "Deck is not eligible for future locking yet.";
+  return "Deck is not eligible for locking yet.";
 }
 
 function getPreflightBadgeLabel(deckSetup: DeckSetupViewModel) {
@@ -33,12 +41,20 @@ function getPreflightBadgeLabel(deckSetup: DeckSetupViewModel) {
     return "Deck missing";
   }
 
+  if (deckSetup.deck.isLocked) {
+    return "Locked";
+  }
+
   return deckSetup.lockPreflight.canLock
-    ? "Preflight ready"
+    ? "Ready to lock"
     : "Preflight blocked";
 }
 
 function getBlockerMessages(deckSetup: DeckSetupViewModel) {
+  if (deckSetup.deck?.isLocked) {
+    return ["Deck is already locked."];
+  }
+
   if (deckSetup.lockPreflight.blockers.length === 0) {
     return ["No lock preflight blockers detected."];
   }
@@ -47,13 +63,17 @@ function getBlockerMessages(deckSetup: DeckSetupViewModel) {
 }
 
 function getRoleGuidance(deckSetup: DeckSetupViewModel) {
-  if (deckSetup.membership.isOwnerAdmin) {
-    return deckSetup.lockPreflight.canLock
-      ? "Owner/admin preflight finds no blockers. A future lock action can use this result, but that action is not built yet."
-      : "Owner/admin members should fix the listed blockers with manual card entry before a future lock action.";
+  if (deckSetup.deck?.isLocked) {
+    return "The locked deck is read-only. Start-game behavior remains unbuilt.";
   }
 
-  return "This preflight is read-only for player members. Owner/admin members manage deck setup and any future lock action.";
+  if (deckSetup.membership.isOwnerAdmin) {
+    return deckSetup.lockPreflight.canLock
+      ? "Owner/admin members can lock the deck now; locking does not start the game."
+      : "Owner/admin members should fix the listed blockers with manual card entry before locking.";
+  }
+
+  return "This preflight is read-only for player members. Owner/admin members manage deck setup and locking.";
 }
 
 function DeckLockPreflightPanel({ deckSetup }: DeckLockPreflightPanelProps) {
@@ -63,24 +83,46 @@ function DeckLockPreflightPanel({ deckSetup }: DeckLockPreflightPanelProps) {
     ...deckSetup.lockPreflight.warnings.map((warning) => warning.message),
     getRoleGuidance(deckSetup)
   ];
+  const canShowLockForm = Boolean(
+    deckSetup.deck &&
+      deckSetup.membership.isOwnerAdmin &&
+      deckSetup.game.status === "setup" &&
+      !deckSetup.deck.isLocked &&
+      deckSetup.lockPreflight.canLock
+  );
+  const panelVariant =
+    deckSetup.deck?.isLocked || deckSetup.lockPreflight.canLock
+      ? "official"
+      : "draft";
+  const hasBlockingLockIssues =
+    deckSetup.lockPreflight.blockers.length > 0 && !deckSetup.deck?.isLocked;
+  const blockerTitle = deckSetup.deck?.isLocked
+    ? "Lock status"
+    : hasBlockingLockIssues
+      ? "Fix before locking"
+      : "Lock blockers";
 
   return (
-    <Card variant={deckSetup.lockPreflight.canLock ? "raised" : "draft"}>
+    <Card variant={panelVariant}>
       <CardHeader>
         <div className="col-start-1 flex flex-col gap-2">
           <div className="flex flex-wrap gap-2">
             <Badge
-              variant={deckSetup.lockPreflight.canLock ? "success" : "attention"}
+              variant={
+                deckSetup.deck?.isLocked || deckSetup.lockPreflight.canLock
+                  ? "success"
+                  : "attention"
+              }
             >
               {getPreflightBadgeLabel(deckSetup)}
             </Badge>
-            <Badge variant="outline">Read-only server preflight</Badge>
+            <Badge variant="outline">Server preflight</Badge>
             <Badge variant="readOnly">{deckSetup.membership.roleLabel}</Badge>
           </div>
           <CardTitle>Deck locking preflight</CardTitle>
           <CardDescription>
-            Server-side readiness result for the game-specific,
-            user-provided deck.
+            Server-side readiness result for the game-specific, user-provided
+            deck. The lock action rechecks these rules before mutating status.
           </CardDescription>
         </div>
         <CardAction>
@@ -126,7 +168,7 @@ function DeckLockPreflightPanel({ deckSetup }: DeckLockPreflightPanelProps) {
               {summary.missingWeekCount}
             </p>
             <p className="text-muted-foreground">
-              block future locking
+              block locking
             </p>
           </div>
           <div className="rounded-md border border-border bg-card p-3">
@@ -137,21 +179,15 @@ function DeckLockPreflightPanel({ deckSetup }: DeckLockPreflightPanelProps) {
               {summary.blankPromptCount}
             </p>
             <p className="text-muted-foreground">
-              block future locking
+              block locking
             </p>
           </div>
         </div>
 
         <ValidationAlert
           messages={blockerMessages}
-          title={
-            deckSetup.lockPreflight.blockers.length
-              ? "Fix before future lock"
-              : "Future lock blockers"
-          }
-          variant={
-            deckSetup.lockPreflight.blockers.length ? "warning" : "success"
-          }
+          title={blockerTitle}
+          variant={hasBlockingLockIssues ? "warning" : "success"}
         />
 
         <ValidationAlert
@@ -161,11 +197,17 @@ function DeckLockPreflightPanel({ deckSetup }: DeckLockPreflightPanelProps) {
         />
       </CardContent>
 
-      <CardFooter>
-        Lock deck is not built yet. Start game is not built yet. No deck status
-        mutation, turn creation, file import, upload, or official/proprietary
-        content is included here.
-      </CardFooter>
+      {canShowLockForm ? (
+        <CardFooter className="block">
+          <LockDeckForm gameId={deckSetup.game.id} />
+        </CardFooter>
+      ) : (
+        <CardFooter>
+          {deckSetup.deck?.isLocked
+            ? "The deck is locked and read-only. Start-game behavior is still not built."
+            : "No lock mutation is available for this role or deck state. Start-game behavior is still not built."}
+        </CardFooter>
+      )}
     </Card>
   );
 }

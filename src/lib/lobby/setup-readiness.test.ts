@@ -265,8 +265,9 @@ test("uses deck validation issue messages in deck setup readiness copy", () => {
         },
         warnings: [
           {
-            code: "locking-not-built",
-            message: "Deck locking is not built yet."
+            code: "mutation-time-validation",
+            message:
+              "Deck locking re-runs validation at mutation time before changing deck status."
           },
           {
             code: "start-game-not-built",
@@ -290,7 +291,7 @@ test("uses deck validation issue messages in deck setup readiness copy", () => {
   );
 });
 
-test("keeps a full prompted draft deck prepared but not complete", () => {
+test("keeps a full prompted draft deck prepared but not complete until locked", () => {
   const readiness = buildLobbySetupReadiness({
     ...orderedTwoMemberInput,
     deckSetup: {
@@ -319,11 +320,41 @@ test("keeps a full prompted draft deck prepared but not complete", () => {
   assert.equal(deckItem?.readinessCategory, "incomplete");
   assert.match(
     deckItem?.validationMessages?.join(" ") ?? "",
-    /Deck appears ready for future locking, but locking is not built yet/i
+    /Deck can be locked now, but it remains draft until owner\/admin locks it/i
   );
 });
 
-test("marks a valid full deck complete when the saved status supports it", () => {
+test("keeps a valid but unlocked full deck incomplete until locked", () => {
+  const readiness = buildLobbySetupReadiness({
+    ...orderedTwoMemberInput,
+    deckSetup: {
+      ...orderedTwoMemberInput.deckSetup,
+      allConfiguredCardsHavePromptText: true,
+      allWeeksRepresented: true,
+      blankPromptCount: 0,
+      cardCount: 52,
+      deckId: "11111111-1111-4111-8111-111111111111",
+      duplicateWeekNumbers: [],
+      hasDuplicateWeekNumbers: false,
+      isLocked: false,
+      missingWeekCount: 0,
+      missingWeekPreviewLabel: "None",
+      promptTextCount: 52,
+      sourceType: "manual",
+      status: "valid",
+      uniqueWeekCount: 52
+    }
+  });
+  const deckItem = readiness.items.find(
+    (item) => item.title === "Deck/card setup"
+  );
+
+  assert.equal(deckItem?.status, "warning");
+  assert.equal(deckItem?.statusLabel, "In progress");
+  assert.equal(deckItem?.readinessCategory, "incomplete");
+});
+
+test("marks a locked full deck complete when coverage still passes", () => {
   const readiness = buildLobbySetupReadiness({
     ...orderedTwoMemberInput,
     deckSetup: {
@@ -340,7 +371,7 @@ test("marks a valid full deck complete when the saved status supports it", () =>
       missingWeekPreviewLabel: "None",
       promptTextCount: 52,
       sourceType: "manual",
-      status: "valid",
+      status: "locked",
       uniqueWeekCount: 52
     }
   });

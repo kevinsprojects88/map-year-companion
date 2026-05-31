@@ -59,6 +59,15 @@ export type Database = {
         };
         Returns: string;
       };
+      lock_game_deck: {
+        Args: {
+          target_game_id: string;
+        };
+        Returns: {
+          deck_id: string;
+          locked_at: string;
+        }[];
+      };
       update_game_turn_order: {
         Args: {
           ordered_profile_ids: string[];

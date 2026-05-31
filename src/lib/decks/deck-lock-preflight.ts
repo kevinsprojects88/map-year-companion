@@ -43,7 +43,7 @@ function buildNonDraftDeckStatusBlocker(
   return {
     code: "non-draft-deck-status",
     message:
-      "Only draft decks are eligible for future locking. This preflight does not change deck status."
+      "Only draft decks are eligible for locking. This preflight does not change deck status."
   };
 }
 
@@ -80,7 +80,7 @@ function buildDeckLockPreflight({
       {
         code: "read-only-preflight",
         message:
-          "This preflight is read-only and does not change deck status, lock the deck, or start the game."
+          "This preflight does not change deck status by itself; the lock action rechecks these rules before locking."
       }
     ]
   };

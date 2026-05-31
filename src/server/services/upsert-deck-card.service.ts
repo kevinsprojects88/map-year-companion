@@ -33,6 +33,12 @@ type DeckCardExistingRow = {
   id: string;
 };
 
+type EditableDeckRow = {
+  id: string;
+  locked_at: string | null;
+  status: string;
+};
+
 function getRelatedGameStatus(game: PermissionRow["games"]) {
   const relatedGame = Array.isArray(game) ? (game[0] ?? null) : game;
 
@@ -133,7 +139,7 @@ async function upsertDeckCardForCurrentUser(
 
   const { data: deck, error: deckError } = await supabase
     .from("decks")
-    .select("id, status")
+    .select("id, status, locked_at")
     .eq("game_id", validation.data.gameId)
     .maybeSingle();
 
@@ -153,7 +159,9 @@ async function upsertDeckCardForCurrentUser(
     };
   }
 
-  if (deck.status !== "draft") {
+  const editableDeck = deck as EditableDeckRow;
+
+  if (editableDeck.status !== "draft" || editableDeck.locked_at) {
     return {
       formError: "Cards can only be edited while the deck is draft.",
       ok: false,
@@ -164,7 +172,7 @@ async function upsertDeckCardForCurrentUser(
   const { data: existingCard, error: existingCardError } = await supabase
     .from("deck_cards")
     .select("id")
-    .eq("deck_id", deck.id)
+    .eq("deck_id", editableDeck.id)
     .eq("week_number", validation.data.weekNumber)
     .maybeSingle();
 
@@ -211,7 +219,7 @@ async function upsertDeckCardForCurrentUser(
 
   const { error: insertError } = await supabase.from("deck_cards").insert({
     card_key: validation.data.cardKey,
-    deck_id: deck.id,
+    deck_id: editableDeck.id,
     prompt_text: validation.data.promptText,
     season: validation.data.season,
     week_number: validation.data.weekNumber

@@ -101,7 +101,7 @@ function isOwnerAdmin(role: DeckMemberRole) {
 }
 
 function formatDateLabel(
-  prefix: "Created" | "Updated",
+  prefix: "Created" | "Updated" | "Locked",
   value: string
 ) {
   const date = new Date(value);
@@ -168,9 +168,7 @@ function isDeckMeaningfullyComplete(
     coverage.allWeeksRepresented &&
     coverage.allConfiguredCardsHavePromptText &&
     !coverage.hasDuplicateWeekNumbers &&
-    (deck.status === "valid" ||
-      deck.status === "locked" ||
-      Boolean(deck.locked_at))
+    (deck.status === "locked" || Boolean(deck.locked_at))
   );
 }
 
@@ -295,6 +293,9 @@ function buildDeckSetupViewModel({
       createdLabel: formatDateLabel("Created", deck.created_at),
       id: deck.id,
       isLocked,
+      lockedAtLabel: deck.locked_at
+        ? formatDateLabel("Locked", deck.locked_at)
+        : null,
       lockedLabel: isLocked ? "Locked" : "Not locked",
       sourceType: deck.source_type,
       sourceTypeLabel: deckSourceLabels[deck.source_type],
@@ -318,10 +319,10 @@ function buildDeckSetupViewModel({
     setup: {
       canCreateDraftDeck: false,
       description: complete
-        ? "Deck setup has saved valid or locked status and passes read-only validation."
+        ? "Deck setup is locked and passes read-only validation."
         : preparedDraft
-          ? "Deck appears ready for future locking, but locking is not built yet."
-          : "Read-only validation shows what needs attention before future deck locking.",
+          ? "Deck can be locked now, but it remains draft until owner/admin locks it."
+          : "Read-only validation shows what needs attention before deck locking.",
       readinessCategory: complete ? "complete" : "incomplete",
       statusLabel: complete
         ? "Complete"

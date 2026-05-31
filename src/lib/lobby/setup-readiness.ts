@@ -121,8 +121,8 @@ function isDeckSetupComplete(deckSetup: DeckSetupReadinessInput) {
   return (
     deckSetup.deckId !== null &&
     isReadyForLocking &&
-    (deckSetup.status === "valid" ||
-      (deckSetup.status === "locked" && deckSetup.isLocked))
+    deckSetup.status === "locked" &&
+    deckSetup.isLocked
   );
 }
 
@@ -153,7 +153,7 @@ function buildDeckSetupChecklistItem({
     deckSetup.validation?.blockingIssues.map((issue) => issue.message) ?? [];
   const validationWarningMessages =
     deckSetup.validation?.warnings.map((warning) => warning.message) ?? [
-      "Deck locking is not built yet.",
+      "Deck locking re-runs validation at mutation time before changing deck status.",
       "Start-game behavior is not built yet."
     ];
   const validationStatusMessages = validationIssueMessages.length
@@ -164,7 +164,7 @@ function buildDeckSetupChecklistItem({
     : ["No draft deck exists yet.", missingWeeksLabel];
   const actionLabel = isOwnerAdmin ? "Open deck setup" : "View deck setup";
   const roleGuidance = isOwnerAdmin
-    ? "Owner/admin members can use the one-card manual entry form for now; import and locking come later."
+    ? "Owner/admin members can use one-card manual entry while the deck is draft, then lock the deck when validation passes."
     : "Deck setup is read-only for player members; owner/admin members manage manual card entry.";
 
   if (!deckSetup.deckId) {
@@ -240,8 +240,8 @@ function buildDeckSetupChecklistItem({
         : [blankPromptLabel, missingWeeksLabel, duplicateWeekLabel]),
       `Deck source is ${deckSetup.sourceType ?? "not set"} and status is ${deckSetup.status ?? "not set"}.`,
       hasPreparedDraftCoverage
-        ? "Deck appears ready for future locking, but locking is not built yet."
-        : "Deck is not ready for future locking yet.",
+        ? "Deck can be locked now, but it remains draft until owner/admin locks it."
+        : "Deck is not ready for locking yet.",
       roleGuidance,
       ...validationWarningMessages,
       "No official/proprietary card content is included."

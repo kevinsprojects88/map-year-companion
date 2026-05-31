@@ -46,6 +46,7 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
   const canEditCards = Boolean(
     deckSetup.deck &&
       deckSetup.membership.isOwnerAdmin &&
+      !deckSetup.deck.isLocked &&
       deckSetup.deck.status === "draft" &&
       deckSetup.game.status === "setup"
   );
@@ -117,8 +118,8 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
               No official/proprietary card content is included.
             </p>
             <p className="text-muted-foreground">
-              JSON import, card art, deck locking, and start-game validation
-              are not part of this slice.
+              JSON import, card art, and start-game validation are not part of
+              this slice.
             </p>
           </CardContent>
         </Card>
@@ -131,7 +132,7 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
       <DeckLockPreflightPanel deckSetup={deckSetup} />
 
       {deckSetup.deck ? (
-        <Card variant="draft">
+        <Card variant={deckSetup.deck.isLocked ? "official" : "draft"}>
           <CardHeader className="gap-y-3">
             <div className="col-start-1 flex flex-col gap-2">
               <div className="flex flex-wrap gap-2">
@@ -142,10 +143,15 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
                 <Badge variant={deckSetup.deck.isLocked ? "success" : "outline"}>
                   {deckSetup.deck.lockedLabel}
                 </Badge>
+                {deckSetup.deck.lockedAtLabel ? (
+                  <Badge variant="readOnly">{deckSetup.deck.lockedAtLabel}</Badge>
+                ) : null}
               </div>
-              <CardTitle>Draft deck record</CardTitle>
+              <CardTitle>
+                {deckSetup.deck.isLocked ? "Locked deck record" : "Draft deck record"}
+              </CardTitle>
               <CardDescription>
-                This is the one draft deck shell for the game.
+                This is the one deck shell for the game.
               </CardDescription>
             </div>
             <CardAction>
@@ -174,9 +180,9 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
             </dl>
           </CardContent>
           <CardFooter>
-            Minimal manual card entry is available while the deck stays draft.
-            This page reports read-only validation, but does not lock the deck
-            or start the game.
+            Minimal manual card entry is available while the deck stays draft
+            and unlocked. Locking closes manual edits; this page still does not
+            start the game.
           </CardFooter>
         </Card>
       ) : deckSetup.setup.canCreateDraftDeck ? (
@@ -212,8 +218,7 @@ function DeckSetupPanel({ deckSetup }: DeckSetupPanelProps) {
           <DeckCardList cards={deckSetup.cards} />
         </CardContent>
         <CardFooter>
-          This is not a full 52-card editor, import flow, deck lock, or
-          start-game engine.
+          This is not a full 52-card editor, import flow, or start-game engine.
         </CardFooter>
       </Card>
 
