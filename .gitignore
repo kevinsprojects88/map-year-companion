@@ -42,3 +42,6 @@ tmp/
 exports/
 
 tsconfig.tsbuildinfo
+
+# Supabase local CLI state
+supabase/.temp/
