@@ -22,7 +22,9 @@ function getOverallStatusLabel(deckSetup: DeckSetupViewModel) {
   }
 
   if (deckSetup.validation.isReadyForLocking) {
-    return "Deck appears ready for future locking, but locking is not built yet.";
+    return deckSetup.deck.isLocked
+      ? "Deck is locked and still passes validation."
+      : "Deck appears ready for locking. Locking re-runs validation before saving.";
   }
 
   return "Deck is not ready for locking.";
@@ -34,13 +36,13 @@ function getOverallBadgeLabel(deckSetup: DeckSetupViewModel) {
   }
 
   return deckSetup.validation.isReadyForLocking
-    ? "Future locking ready"
+    ? "Ready to lock"
     : "Needs attention";
 }
 
 function getRoleGuidance(deckSetup: DeckSetupViewModel) {
   if (deckSetup.membership.isOwnerAdmin) {
-    return "Manual card entry is the current setup method. Fill missing weeks and blank prompts here; import, locking, and start-game behavior come later.";
+    return "Manual card entry remains available while the deck is draft. Fill missing weeks and blank prompts here before locking.";
   }
 
   return "This validation status is read-only for player members. Owner/admin members manage deck setup.";
@@ -144,7 +146,7 @@ function DeckValidationSummary({ deckSetup }: DeckValidationSummaryProps) {
           messages={blockingMessages}
           title={
             deckSetup.validation.blockingIssues.length
-              ? "Before future locking"
+              ? "Before locking"
               : "Validation blockers"
           }
           variant={
@@ -154,14 +156,14 @@ function DeckValidationSummary({ deckSetup }: DeckValidationSummaryProps) {
 
         <ValidationAlert
           messages={[...warningMessages, getRoleGuidance(deckSetup)]}
-          title="Read-only scope"
+          title="Validation scope"
           variant="warning"
         />
       </CardContent>
 
       <CardFooter>
-        Deck locking and start-game behavior are not built yet. No official card
-        content is included, generated, seeded, imported, or uploaded here.
+        Start-game behavior is not built yet. No official card content is
+        included, generated, seeded, imported, or uploaded here.
       </CardFooter>
     </Card>
   );

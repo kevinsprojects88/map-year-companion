@@ -27,27 +27,42 @@ function getCoverageStatusMessage(deckSetup: DeckSetupViewModel) {
   }
 
   if (
-    (deck.isLocked || deck.status === "valid") &&
+    deck.isLocked &&
     cardSetup.allWeeksRepresented &&
     cardSetup.allConfiguredCardsHavePromptText
   ) {
-    return "Deck has a saved valid or locked status; start-game behavior is still not built here.";
+    return "Deck is locked and coverage remains complete; start-game behavior is still not built here.";
+  }
+
+  if (
+    deck.status === "valid" &&
+    cardSetup.allWeeksRepresented &&
+    cardSetup.allConfiguredCardsHavePromptText
+  ) {
+    return "Deck has complete coverage, but it is not complete for setup until it is locked.";
   }
 
   if (deck.isLocked || deck.status === "valid") {
     return "Deck status is saved as valid or locked, but coverage still needs attention.";
   }
 
-  if (cardSetup.allWeeksRepresented) {
-    return "All 52 weeks are represented, but deck locking is not built yet.";
+  if (
+    cardSetup.allWeeksRepresented &&
+    cardSetup.allConfiguredCardsHavePromptText
+  ) {
+    return "All 52 weeks are represented with prompt text. Owner/admin members can lock the deck now.";
   }
 
-  return "Deck remains draft. Validation is read-only and locking is not built yet.";
+  if (cardSetup.allWeeksRepresented) {
+    return "All 52 weeks are represented. Non-blank prompts are still required before locking.";
+  }
+
+  return "Deck remains draft. Validation shows what needs attention before locking.";
 }
 
 function getRoleStatusMessage(deckSetup: DeckSetupViewModel) {
   if (deckSetup.membership.isOwnerAdmin) {
-    return "Use the one-card manual entry form for now. Import and locking come later.";
+    return "Use the one-card manual entry form while the deck is draft, then lock the deck when validation passes.";
   }
 
   return "Deck setup is read-only for your role; owner/admin members manage manual card entry.";

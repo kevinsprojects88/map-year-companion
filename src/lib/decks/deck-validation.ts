@@ -20,7 +20,7 @@ type DeckValidationIssueCode =
   | "blank-prompts";
 
 type DeckValidationWarningCode =
-  | "locking-not-built"
+  | "mutation-time-validation"
   | "start-game-not-built"
   | "saved-status-only";
 
@@ -183,8 +183,9 @@ function validateDeckReadiness({
 
   const warnings: DeckValidationMessage[] = [
     {
-      code: "locking-not-built",
-      message: "Deck locking is not built yet."
+      code: "mutation-time-validation",
+      message:
+        "Deck locking re-runs validation at mutation time before changing deck status."
     },
     {
       code: "start-game-not-built",
@@ -196,7 +197,7 @@ function validateDeckReadiness({
     warnings.push({
       code: "saved-status-only",
       message:
-        "Saved valid or locked status is reported only; this page does not change deck status."
+        "Saved valid or locked status is reported only; start-game behavior is not enabled here."
     });
   }
 

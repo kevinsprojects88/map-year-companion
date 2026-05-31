@@ -86,7 +86,7 @@ test("reports duplicate weeks and blank prompt weeks", () => {
   );
 });
 
-test("marks a full prompted draft deck ready for future locking only", () => {
+test("marks a full prompted draft deck ready for locking without mutating it", () => {
   const validation = validateDeckReadiness({
     cards: buildPromptedDeckCards(),
     deck: {
@@ -102,7 +102,7 @@ test("marks a full prompted draft deck ready for future locking only", () => {
   assert.equal(validation.summary.promptFilledCount, 52);
   assert.match(
     validation.warnings.map((warning) => warning.message).join(" "),
-    /locking is not built yet/i
+    /locking re-runs validation at mutation time/i
   );
 });
 
